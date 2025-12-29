@@ -1,176 +1,187 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Turret vs Zombies</title>
 
 <style>
-:root {
-  --green:#0a7a0a;
-  --bg:#111;
-  --panel:#222;
-  --gold:#f5c542;
-}
-
-* { box-sizing: border-box; }
-
+/* ================= BASE ================= */
 body {
-  margin:0;
-  background:var(--bg);
-  color:#fff;
-  font-family:system-ui, sans-serif;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  height:100vh;
+  margin: 0;
+  background: #0f0f0f;
+  font-family: system-ui, sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
 }
 
-/* TOP */
+#game {
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ================= TOP ================= */
 #topBar {
-  width:100%;
-  padding:8px 12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  width: 100%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-#stats { display:flex; gap:16px; }
-#wave { font-weight:bold; }
-
-#shopBtn {
-  background:var(--gold);
-  border:none;
-  border-radius:6px;
-  padding:6px 10px;
-  font-weight:bold;
+#stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
 }
 
-/* BOARD */
-#boardWrap {
+#cooldownBar {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 4px;
+  height: 8px;
+}
+
+.cooldownSeg {
+  background: #333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cooldownSegFill {
+  height: 100%;
+  width: 0%;
+  background: gold;
+  transition: width 0.08s linear;
+}
+
+/* ================= GRID ================= */
+#boardWrapper {
   position: relative;
 }
 
 #board {
-  display:grid;
-  grid-template-columns:repeat(5,56px);
-  grid-template-rows:repeat(10,56px);
-  gap:4px;
-  padding:6px;
-  background:#222;
-  border-radius:12px;
+  display: grid;
+  grid-template-columns: repeat(5, 56px);
+  grid-template-rows: repeat(10, 56px);
+  gap: 4px;
+  padding: 6px;
+  background: #222;
+  border-radius: 12px;
 }
 
 .cell {
-  background:var(--green);
-  border-radius:6px;
+  background: #0a7a0a;
+  border-radius: 6px;
 }
 
-.turret{background:black!important;}
-.bullet{background:#8b4513!important;}
-.basic{background:#2466ff!important;}
-.armored{background:orange!important;}
-.heavy{background:#999!important;}
-.danger{background:#b00000!important;}
-
-/* GAME OVER OVERLAY */
-#gameOver {
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.8);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:14px;
-  z-index:20;
+.danger {
+  background: #8b0000 !important;
 }
 
-#gameOver h1 {
-  color:red;
-  margin:0;
+/* ================= ENTITIES ================= */
+#entities {
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
 }
 
-#retryBtn {
-  padding:8px 18px;
-  font-size:18px;
-  border:none;
-  border-radius:8px;
-  background:var(--gold);
-  font-weight:bold;
+.entity {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* CONTROLS */
+/* Turret */
+.turret {
+  width: 38px;
+  height: 38px;
+  background: black;
+  border-radius: 6px;
+}
+
+/* Bullet */
+.bullet {
+  width: 16px;
+  height: 16px;
+  background: #8b4513;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(139,69,19,.8);
+}
+
+/* Zombies */
+.zombie {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: 2px solid rgba(0,0,0,.35);
+}
+.basic { background:#2c6bff; }
+.armored { background:orange; }
+.heavy { background:#777; }
+
+/* ================= CONTROLS ================= */
 #controls {
-  display:flex;
-  gap:12px;
-  margin-top:10px;
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+#controls button {
+  width: 70px;
+  height: 48px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  background: #333;
+  color: white;
 }
 
-.btn {
-  width:72px;
-  height:48px;
-  font-size:20px;
-  border:none;
-  border-radius:8px;
-  background:#333;
-  color:white;
+/* ================= OVERLAYS ================= */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
 }
 
-#shootBtn {
-  position:relative;
-  overflow:hidden;
+.panel {
+  background: #1b1b1b;
+  padding: 16px;
+  border-radius: 12px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-#cooldownBar {
-  position:absolute;
-  bottom:0;
-  left:0;
-  height:4px;
-  background:var(--gold);
-  width:0%;
+.upgradeRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  background: #2a2a2a;
+  padding: 8px;
+  border-radius: 8px;
 }
 
-/* SHOP */
-#shop {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:50;
+.upgradeRow button {
+  background: gold;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: bold;
 }
-
-#shopBox {
-  background:#222;
-  width:90%;
-  max-width:380px;
-  padding:14px;
-  border-radius:14px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.shopRow {
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:8px;
-  background:#2b2b2b;
-  padding:8px;
-  border-radius:8px;
-}
-
-.shopBtn {
-  background:var(--gold);
-  border:none;
-  border-radius:6px;
-  padding:6px 10px;
-  font-weight:bold;
-}
-
-.shopBtn:disabled {
+.upgradeRow button:disabled {
   background:#555;
   color:#aaa;
 }
@@ -179,112 +190,179 @@ body {
 
 <body>
 
-<div id="topBar">
-  <button id="shopBtn">Shop</button>
-  <div id="stats">
-    <div id="kills">Kills: 0</div>
-    <div id="coins">Coins: 0</div>
-    <div id="wave">Wave 1</div>
-  </div>
-</div>
+<div id="game">
 
-<div id="boardWrap">
-  <div id="board"></div>
-
-  <div id="gameOver">
-    <h1>GAME OVER</h1>
-    <button id="retryBtn">Retry</button>
-  </div>
-</div>
-
-<div id="controls">
-  <button class="btn" id="leftBtn">⬅️</button>
-  <button class="btn" id="shootBtn">
-    🔫
+  <div id="topBar">
+    <div id="stats">
+      <div id="kills">Kills: 0</div>
+      <div id="wave">Wave: 1</div>
+      <div id="coins">Coins: 0</div>
+    </div>
     <div id="cooldownBar"></div>
-  </button>
-  <button class="btn" id="rightBtn">➡️</button>
+  </div>
+
+  <div id="boardWrapper">
+    <div id="board"></div>
+    <div id="entities"></div>
+
+    <div id="gameOver" class="overlay">
+      <div class="panel">
+        <h2 style="color:red;margin:0">GAME OVER</h2>
+        <button onclick="restart()">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <button onclick="move(-1)">⬅</button>
+    <button onclick="shoot()">🔫</button>
+    <button onclick="move(1)">➡</button>
+    <button onclick="openUpgrades()">🛒</button>
+  </div>
 </div>
 
-<div id="shop">
-  <div id="shopBox">
+<div id="upgradeOverlay" class="overlay">
+  <div class="panel">
     <h3>Upgrades</h3>
-    <div class="shopRow"><div>Cooldown</div><button id="cdBtn" class="shopBtn"></button></div>
-    <div class="shopRow"><div>Bullet Speed</div><button id="spdBtn" class="shopBtn"></button></div>
-    <div class="shopRow"><div>Burst Shots</div><button id="burstBtn" class="shopBtn"></button></div>
-    <div class="shopRow"><div>Coin Gain</div><button id="coinBtn" class="shopBtn"></button></div>
-    <div class="shopRow"><div>Pierce Chance</div><button id="pierceBtn" class="shopBtn"></button></div>
-    <button class="btn" onclick="toggleShop()">Close</button>
+    <div id="upgradeList"></div>
+    <button onclick="closeUpgrades()">Close</button>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const COLS=5, ROWS=10;
-const LOOP=50;
+/* ================= CONSTANTS ================= */
+const COLS=5, ROWS=10, TILE=60, LOOP=50;
 
 /* ================= GRID ================= */
 const board=document.getElementById("board");
-const cells=[];
 for(let r=0;r<ROWS;r++){
-  cells[r]=[];
   for(let c=0;c<COLS;c++){
     const d=document.createElement("div");
     d.className="cell";
+    if(r===ROWS-2) d.classList.add("danger");
     board.appendChild(d);
-    cells[r][c]=d;
   }
 }
 
-/* ================= GLOBAL STATE ================= */
+/* ================= STATE ================= */
 let turretCol, bullets, zombies;
-let kills, coins, wave;
-let running, gameOver;
+let kills, coins, running, over;
 
 let shootCooldown, bulletSpeed, burst, burstLeft;
-let coinMul, pierceChance;
+let knockback, coinMult;
+
+let coolingDown=false;
+let cooldownStart=0;
 let spawnDelay, armoredChance, heavyChance;
-let canShoot;
+
+/* ================= UPGRADES ================= */
+const upgrades=[
+  {name:"Cooldown", vals:[3250,2500,2000,1250,500], costs:[300,1e3,5e3,25e3,1e5], apply:v=>shootCooldown=v},
+  {name:"Bullet Speed", vals:[0.35,0.5,0.8,1.2,1.6], costs:[200,500,2500,1e4,25e3], apply:v=>bulletSpeed=v},
+  {name:"Burst", vals:[2,3,4], costs:[1e3,1e4,1e5], apply:v=>{burst=v;burstLeft=v}},
+  {name:"Coin Gain", vals:[1.5,2,3,4], costs:[750,4e3,25e3,75e3], apply:v=>coinMult=v},
+  {name:"Knockback", vals:[1,2,3], costs:[2e3,1e4,5e4], apply:v=>knockback=v}
+];
+upgrades.forEach(u=>u.lvl=0);
 
 /* ================= RESET ================= */
-function resetGame(){
+function restart(){
   turretCol=2;
   bullets=[];
   zombies=[];
   kills=0;
   coins=0;
-  wave=1;
 
   shootCooldown=3750;
   bulletSpeed=0.25;
   burst=1;
   burstLeft=1;
-  coinMul=1;
-  pierceChance=0;
+  knockback=0;
+  coinMult=1;
+
+  coolingDown=false;
+  cooldownStart=0;
 
   spawnDelay=4000;
-  armoredChance=0.25;
-  heavyChance=0.10;
+  armoredChance=.25;
+  heavyChance=.1;
 
-  canShoot=true;
+  upgrades.forEach(u=>u.lvl=0);
+
   running=true;
-  gameOver=false;
-
+  over=false;
   document.getElementById("gameOver").style.display="none";
-  refreshShop();
+  refreshUpgrades();
+}
+restart();
+
+/* ================= INPUT ================= */
+function move(d){
+  if(!running) return;
+  turretCol=Math.max(0,Math.min(COLS-1,turretCol+d));
+}
+
+function shoot(){
+  if(!running||burstLeft<=0||coolingDown) return;
+
+  bullets.push({y:ROWS-1, prevY:ROWS-1, col:turretCol});
+  burstLeft--;
+
+  if(burstLeft===0){
+    coolingDown=true;
+    cooldownStart=Date.now();
+  }
+}
+
+/* ================= COOLDOWN ================= */
+function updateCooldown(){
+  if(!coolingDown) return;
+
+  const elapsed=Date.now()-cooldownStart;
+  const perSeg=shootCooldown/burst;
+  burstLeft=Math.min(burst,Math.floor(elapsed/perSeg));
+
+  if(burstLeft>=burst){
+    burstLeft=burst;
+    coolingDown=false;
+  }
+}
+
+function drawCooldown(){
+  const bar=document.getElementById("cooldownBar");
+  bar.innerHTML="";
+  const elapsed=Date.now()-cooldownStart;
+  const perSeg=shootCooldown/burst;
+
+  for(let i=0;i<burst;i++){
+    const seg=document.createElement("div");
+    seg.className="cooldownSeg";
+    const fill=document.createElement("div");
+    fill.className="cooldownSegFill";
+
+    if(!coolingDown){
+      fill.style.width=i<burstLeft?"100%":"0%";
+    }else{
+      const prog=Math.min(1,Math.max(0,(elapsed-i*perSeg)/perSeg));
+      fill.style.width=(prog*100)+"%";
+    }
+
+    seg.appendChild(fill);
+    bar.appendChild(seg);
+  }
 }
 
 /* ================= SPAWN ================= */
 function spawnZombie(){
-  let roll=Math.random();
   let z={type:"basic",hp:1};
+  const r=Math.random();
 
-  if(kills>=100 && roll<heavyChance){
+  if(kills>=150 && r<heavyChance){
     z={type:"heavy",hp:3};
-    heavyChance=Math.min(.20,heavyChance+.001);
-  } else if(kills>=25 && roll<armoredChance){
+    heavyChance=Math.min(.2,heavyChance+.001);
+  }else if(kills>=50 && r<armoredChance){
     z={type:"armored",hp:2};
-    armoredChance=Math.min(.50,armoredChance+.001);
+    armoredChance=Math.min(.5,armoredChance+.001);
   }
 
   z.col=Math.floor(Math.random()*COLS);
@@ -292,62 +370,44 @@ function spawnZombie(){
   zombies.push(z);
 }
 
-function spawnLoop(){
-  if(gameOver) return;
-  spawnZombie();
-  if(kills/10>wave){ wave++; spawnDelay=Math.max(800,spawnDelay-300); }
-  setTimeout(spawnLoop,spawnDelay);
-}
-
-/* ================= SHOOT ================= */
-const shootBtn=document.getElementById("shootBtn");
-const cooldownBar=document.getElementById("cooldownBar");
-
-shootBtn.onclick=()=>{
-  if(!running||!canShoot) return;
-  bullets.push({y:ROWS-1-0.01,col:turretCol});
-  burstLeft--;
-  if(burstLeft<=0){
-    canShoot=false;
-    let start=Date.now();
-    let t=setInterval(()=>{
-      let p=(Date.now()-start)/shootCooldown;
-      cooldownBar.style.width=Math.min(100,p*100)+"%";
-      if(p>=1){
-        clearInterval(t);
-        cooldownBar.style.width="0%";
-        burstLeft=burst;
-        canShoot=true;
-      }
-    },16);
+(function spawnLoop(){
+  if(!over){
+    spawnZombie();
+    spawnDelay=Math.max(800,spawnDelay-10);
   }
-};
+  setTimeout(spawnLoop,spawnDelay);
+})();
 
 /* ================= UPDATE ================= */
 function update(){
-  bullets.forEach(b=>b.y-=bulletSpeed);
+  updateCooldown();
+
   zombies.forEach(z=>z.y+=0.04);
+  bullets.forEach(b=>{b.prevY=b.y; b.y-=bulletSpeed;});
 
   for(let i=bullets.length-1;i>=0;i--){
+    const b=bullets[i];
     for(let j=zombies.length-1;j>=0;j--){
-      const b=bullets[i],z=zombies[j];
-      if(Math.abs(b.y-z.y)<0.4 && b.col===z.col){
-        if(Math.random()>pierceChance) bullets.splice(i,1);
+      const z=zombies[j];
+      if(b.col===z.col && b.prevY>=z.y && b.y<=z.y+.5){
+        bullets.splice(i,1);
         z.hp--;
+        if(knockback) z.y=Math.max(0,z.y-knockback);
+
         if(z.hp<=0){
           zombies.splice(j,1);
           kills++;
-          let drop=25+Math.random()*5;
-          if(z.type==="armored") drop=50+Math.random()*10;
-          if(z.type==="heavy") drop=90+Math.random()*20;
-          coins+=Math.floor(drop*coinMul);
-        } else {
+          let drop=50+Math.random()*10;
+          if(z.type==="armored") drop=90+Math.random()*20;
+          if(z.type==="heavy") drop=150+Math.random()*30;
+          coins+=Math.floor(drop*coinMult);
+        }else{
           z.type=z.type==="heavy"?"armored":"basic";
         }
-        return;
+        break;
       }
     }
-    if(bullets[i]&&bullets[i].y<0) bullets.splice(i,1);
+    if(bullets[i]&&b.y<0) bullets.splice(i,1);
   }
 
   zombies.forEach(z=>{ if(z.y>=ROWS-2) endGame(); });
@@ -355,92 +415,91 @@ function update(){
 
 /* ================= DRAW ================= */
 function draw(){
-  cells.flat().forEach(c=>c.className="cell");
-  for(let c=0;c<COLS;c++) cells[ROWS-2][c].classList.add("danger");
+  const ent=document.getElementById("entities");
+  ent.innerHTML="";
 
   bullets.forEach(b=>{
-    const r=Math.floor(b.y);
-    if(cells[r]) cells[r][b.col].classList.add("bullet");
+    const d=document.createElement("div");
+    d.className="entity";
+    d.style.transform=`translate(${b.col*TILE}px,${b.y*TILE}px)`;
+    d.innerHTML='<div class="bullet"></div>';
+    ent.appendChild(d);
   });
 
   zombies.forEach(z=>{
-    const r=Math.floor(z.y);
-    if(cells[r]) cells[r][z.col].classList.add(z.type);
+    const d=document.createElement("div");
+    d.className="entity";
+    d.style.transform=`translate(${z.col*TILE}px,${z.y*TILE}px)`;
+    d.innerHTML=`<div class="zombie ${z.type}"></div>`;
+    ent.appendChild(d);
   });
 
-  cells[ROWS-1][turretCol].classList.add("turret");
+  const t=document.createElement("div");
+  t.className="entity";
+  t.style.transform=`translate(${turretCol*TILE}px,${(ROWS-1)*TILE}px)`;
+  t.innerHTML='<div class="turret"></div>';
+  ent.appendChild(t);
 
-  killsEl.textContent="Kills: "+kills;
-  coinsEl.textContent="Coins: "+coins;
-  waveEl.textContent="Wave "+wave;
+  document.getElementById("kills").textContent=`Kills: ${kills}`;
+  document.getElementById("coins").textContent=`Coins: ${coins}`;
+  document.getElementById("wave").textContent=`Wave: ${Math.floor(kills/25)+1}`;
+
+  drawCooldown();
 }
 
 /* ================= LOOP ================= */
-setInterval(()=>{ if(running&&!gameOver){update();draw();}},LOOP);
+setInterval(()=>{ if(running&&!over){update();draw();}},LOOP);
 
-/* ================= END ================= */
+/* ================= UI ================= */
 function endGame(){
-  gameOver=true;
   running=false;
+  over=true;
   document.getElementById("gameOver").style.display="flex";
 }
 
-/* ================= CONTROLS ================= */
-leftBtn.onclick=()=>{if(running&&turretCol>0)turretCol--;};
-rightBtn.onclick=()=>{if(running&&turretCol<COLS-1)turretCol++;};
-
-/* ================= SHOP ================= */
-function toggleShop(){
-  shop.style.display=shop.style.display==="flex"?"none":"flex";
-  running=shop.style.display!=="flex";
-}
-shopBtn.onclick=toggleShop;
-
-/* ================= UPGRADES ================= */
-const upgrades={
-  cooldown:{vals:[3250,2500,2000,1250,500],costs:[300,1e3,5e3,25e3,1e5],lvl:0},
-  speed:{vals:[0.35,0.5,0.8,1.2,1.6],costs:[200,500,2500,1e4,25e3],lvl:0},
-  burst:{vals:[2,3,4],costs:[1e3,1e4,1e5],lvl:0},
-  coins:{vals:[1.5,2,3,4],costs:[750,4e3,25e3,75e3],lvl:0},
-  pierce:{vals:[0.1,0.2,0.35],costs:[2e3,1e4,5e4],lvl:0}
-};
-
-function bind(btn,key,apply){
-  btn.onclick=()=>{
-    const u=upgrades[key];
-    if(u.lvl>=u.vals.length||coins<u.costs[u.lvl]) return;
-    coins-=u.costs[u.lvl];
-    apply(u.vals[u.lvl]);
-    u.lvl++;
-    refreshShop();
-  };
+function openUpgrades(){
+  running=false;
+  document.getElementById("upgradeOverlay").style.display="flex";
 }
 
-function refreshShop(){
-  [["cooldown",cdBtn],["speed",spdBtn],["burst",burstBtn],["coins",coinBtn],["pierce",pierceBtn]]
-  .forEach(([k,b])=>{
-    const u=upgrades[k];
-    if(u.lvl>=u.vals.length){ b.textContent="MAX"; b.disabled=true; }
-    else b.textContent=u.costs[u.lvl];
+function closeUpgrades(){
+  running=true;
+  document.getElementById("upgradeOverlay").style.display="none";
+}
+
+function refreshUpgrades(){
+  const list=document.getElementById("upgradeList");
+  list.innerHTML="";
+  upgrades.forEach(u=>{
+    const row=document.createElement("div");
+    row.className="upgradeRow";
+
+    const info=document.createElement("div");
+    const cur=u.lvl?u.vals[u.lvl-1]:"Base";
+    const next=u.lvl<u.vals.length?u.vals[u.lvl]:"MAX";
+    info.innerHTML=`<b>${u.name}</b><br>Current: ${cur}<br>Next: ${next}`;
+
+    const btn=document.createElement("button");
+    if(u.lvl>=u.vals.length){
+      btn.textContent="MAX";
+      btn.disabled=true;
+    }else{
+      btn.textContent=u.costs[u.lvl];
+      btn.disabled=coins<u.costs[u.lvl];
+      btn.onclick=()=>{
+        coins-=u.costs[u.lvl];
+        u.apply(u.vals[u.lvl]);
+        u.lvl++;
+        refreshUpgrades();
+      };
+    }
+
+    row.append(info,btn);
+    list.appendChild(row);
   });
 }
-
-bind(cdBtn,"cooldown",v=>shootCooldown=v);
-bind(spdBtn,"speed",v=>bulletSpeed=v);
-bind(burstBtn,"burst",v=>{burst=v;burstLeft=v;});
-bind(coinBtn,"coins",v=>coinMul=v);
-bind(pierceBtn,"pierce",v=>pierceChance=v);
-
-/* ================= START ================= */
-const killsEl=document.getElementById("kills");
-const coinsEl=document.getElementById("coins");
-const waveEl=document.getElementById("wave");
-
-retryBtn.onclick=()=>{ resetGame(); spawnLoop(); };
-
-resetGame();
-spawnLoop();
-draw();
+setInterval(refreshUpgrades,300);
 </script>
+
 </body>
 </html>
