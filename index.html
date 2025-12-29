@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turret vs Zombies</title>
+
+<style>
+body {
+  margin: 0;
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
+#topBar {
+  width: 100%;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#stats { display: flex; gap: 16px; }
+
+#shopBtn {
+  background: gold;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: bold;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(5, 56px);
+  grid-template-rows: repeat(10, 56px);
+  gap: 4px;
+  background: #222;
+  padding: 6px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.cell {
+  width: 56px;
+  height: 56px;
+  background: #0a7a0a;
+  border-radius: 5px;
+}
+
+.turret { background: black !important; }
+.bullet { background: #8b4513 !important; }
+.basic { background: #2466ff !important; }
+.armored { background: orange !important; }
+.heavy { background: gray !important; }
+.danger { background: red !important; }
+
+#controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn {
+  width: 70px;
+  height: 46px;
+  font-size: 20px;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: white;
+}
+
+#gameOver {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  color: red;
+  font-size: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SHOP */
+#shop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#shopBox {
+  width: 90%;
+  max-width: 360px;
+  background: #222;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shopRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  background: #2b2b2b;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.shopBtn {
+  background: gold;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  padding: 6px 10px;
+}
+
+.shopBtn:disabled {
+  background: #555;
+  color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<div id="topBar">
+  <button id="shopBtn">Shop</button>
+  <div id="stats">
+    <div id="kills">Kills: 0</div>
+    <div id="coins">Coins: 0</div>
+  </div>
+</div>
+
+<div id="board">
+  <div id="gameOver">GAME OVER</div>
+</div>
+
+<div id="controls">
+  <button id="leftBtn" class="btn">⬅️</button>
+  <button id="shootBtn" class="btn">🔫</button>
+  <button id="rightBtn" class="btn">➡️</button>
+</div>
+
+<div id="shop">
+  <div id="shopBox">
+    <div class="shopRow">
+      <div>Reduce cooldown</div>
+      <button id="cdBtn" class="shopBtn"></button>
+    </div>
+    <div class="shopRow">
+      <div>Increase bullet speed</div>
+      <button id="speedBtn" class="shopBtn"></button>
+    </div>
+    <div class="shopRow">
+      <div>More burst shots</div>
+      <button id="multiBtn" class="shopBtn"></button>
+    </div>
+    <div class="shopRow">
+      <div>More coins per kill</div>
+      <button id="coinBtn" class="shopBtn"></button>
+    </div>
+    <button class="btn" onclick="closeShop()">Close</button>
+  </div>
+</div>
+
+<script>
+/* ===== GRID ===== */
+const COLS=5, ROWS=10;
+const board=document.getElementById("board");
+const cells=[];
+for(let r=0;r<ROWS;r++){
+  cells[r]=[];
+  for(let c=0;c<COLS;c++){
+    const d=document.createElement("div");
+    d.className="cell";
+    board.appendChild(d);
+    cells[r][c]=d;
+  }
+}
+
+/* ===== STATE ===== */
+let turretCol=2;
+const turretRow=9;
+let bullets=[], zombies=[];
+let kills= 0, coins= 0;
+let running=true, gameOver=false;
+
+/* ===== SPAWN PROB ===== */
+let armoredChance=0.25;
+let heavyChance=0.10;
+
+/* ===== UPGRADES ===== */
+const upgrades={
+  cooldown:[3250,2500,2000,1250,500],
+  speed:[0.35,0.5,0.8,1.2,1.6],
+  multi:[2,3,4],
+  coins:[1.5,2,3,4]
+};
+const costs={
+  cooldown:[300,1000,5000,25000,100000],
+  speed:[200,500,2500,10000,25000],
+  multi:[1000,10000,100000],
+  coins:[750,4000,25000,75000]
+};
+const lvl={cooldown:0,speed:0,multi:0,coins:0};
+
+let shootCooldown=3750;
+let bulletSpeed=0.25;
+let burst=1, burstLeft=1;
+let coinMul=1;
+
+/* ===== SPAWN ===== */
+let spawnDelay=4000;
+function spawnZombie(){
+  let roll=Math.random();
+  let type="basic", hp=1;
+
+  if(kills>=100 && roll<heavyChance){
+    type="heavy"; hp=3;
+    heavyChance=Math.min(0.20,heavyChance+0.001);
+  } else if(kills>=25 && roll<armoredChance){
+    type="armored"; hp=2;
+    armoredChance=Math.min(0.50,armoredChance+0.001);
+  }
+
+  zombies.push({type,hp,col:Math.floor(Math.random()*COLS),y:0});
+}
+
+function spawnLoop(){
+  if(gameOver) return;
+  spawnZombie();
+  spawnDelay=Math.max(800,spawnDelay-10);
+  setTimeout(spawnLoop,spawnDelay);
+}
+
+/* ===== SHOOT ===== */
+let canShoot=true;
+shootBtn.onclick=()=>{
+  if(!running||!canShoot) return;
+  bullets.push({y:turretRow-0.01,col:turretCol});
+  burstLeft--;
+  if(burstLeft<=0){
+    canShoot=false;
+    shootBtn.disabled=true;
+    setTimeout(()=>{
+      burstLeft=burst;
+      canShoot=true;
+      shootBtn.disabled=false;
+    },shootCooldown);
+  }
+};
+
+/* ===== UPDATE ===== */
+function update(){
+  bullets.forEach(b=>b.y-=bulletSpeed);
+  zombies.forEach(z=>z.y+=0.04);
+
+  for(let i=bullets.length-1;i>=0;i--){
+    for(let j=zombies.length-1;j>=0;j--){
+      const b=bullets[i],z=zombies[j];
+      if(Math.abs(b.y-z.y)<0.4&&b.col===z.col){
+        bullets.splice(i,1);
+        z.hp--;
+        if(z.hp<=0){
+          zombies.splice(j,1);
+          kills++;
+          let drop=25+Math.random()*5;
+          if(z.type==="armored") drop=50+Math.random()*10;
+          if(z.type==="heavy") drop=90+Math.random()*20;
+          coins+=Math.floor(drop*coinMul);
+        } else {
+          z.type=z.type==="heavy"?"armored":"basic";
+        }
+        return;
+      }
+    }
+    if(bullets[i]&&bullets[i].y<0) bullets.splice(i,1);
+  }
+
+  zombies.forEach(z=>{ if(z.y>=ROWS-2) endGame(); });
+}
+
+/* ===== DRAW ===== */
+function draw(){
+  cells.flat().forEach(c=>c.className="cell");
+  for(let c=0;c<COLS;c++) cells[ROWS-2][c].classList.add("danger");
+
+  bullets.forEach(b=>{
+    const r=Math.floor(b.y);
+    if(cells[r]) cells[r][b.col].classList.add("bullet");
+  });
+
+  zombies.forEach(z=>{
+    const r=Math.floor(z.y);
+    if(cells[r]) cells[r][z.col].classList.add(z.type);
+  });
+
+  cells[turretRow][turretCol].classList.add("turret");
+  killsEl.textContent="Kills: "+kills;
+  coinsEl.textContent="Coins: "+coins;
+}
+
+/* ===== LOOP ===== */
+setInterval(()=>{if(running&&!gameOver){update();draw();}},50);
+
+/* ===== END ===== */
+function endGame(){
+  gameOver=true;
+  running=false;
+  document.getElementById("gameOver").style.display="flex";
+}
+
+/* ===== MOVE ===== */
+leftBtn.onclick=()=>{if(running&&turretCol>0)turretCol--;};
+rightBtn.onclick=()=>{if(running&&turretCol<COLS-1)turretCol++;};
+
+/* ===== SHOP ===== */
+shopBtn.onclick=()=>{running=false;shop.style.display="flex";};
+function closeShop(){shop.style.display="none";if(!gameOver)running=true;}
+
+function hook(btn,key,apply){
+  btn.onclick=()=>{
+    if(lvl[key]>=upgrades[key].length) return;
+    if(coins<costs[key][lvl[key]]) return;
+    coins-=costs[key][lvl[key]];
+    apply(upgrades[key][lvl[key]]);
+    lvl[key]++;
+    refresh();
+  };
+}
+
+function refresh(){
+  [["cooldown",cdBtn],["speed",speedBtn],["multi",multiBtn],["coins",coinBtn]]
+  .forEach(([k,b])=>{
+    if(lvl[k]>=upgrades[k].length){
+      b.textContent="MAX"; b.disabled=true;
+    } else b.textContent=costs[k][lvl[k]];
+  });
+}
+
+hook(cdBtn,"cooldown",v=>shootCooldown=v);
+hook(speedBtn,"speed",v=>bulletSpeed=v);
+hook(multiBtn,"multi",v=>{burst=v;burstLeft=v;});
+hook(coinBtn,"coins",v=>coinMul=v);
+
+const killsEl=document.getElementById("kills");
+const coinsEl=document.getElementById("coins");
+
+refresh();
+spawnLoop();
+draw();
+</script>
+</body>
+</html>
