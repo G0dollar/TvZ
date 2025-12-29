@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Turret vs Zombies</title>
 
-<style>
-/* ================= BASE ================= */
+<style> 
 body {
   margin: 0;
   background: #0f0f0f;
@@ -25,13 +23,13 @@ body {
   align-items: center;
 }
 
-/* ================= TOP ================= */
-#topBar {
-  width: 100%;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+
+#topBar { 
+   width: 100%; 
+   padding: 8px; 
+   display: flex; 
+   flex-direction: column; 
+   gap: 6px; 
 }
 
 #stats {
@@ -60,7 +58,7 @@ body {
   transition: width 0.08s linear;
 }
 
-/* ================= GRID ================= */
+
 #boardWrapper {
   position: relative;
 }
@@ -69,22 +67,37 @@ body {
   display: grid;
   grid-template-columns: repeat(5, 56px);
   grid-template-rows: repeat(10, 56px);
-  gap: 4px;
+  gap: 0;
   padding: 6px;
   background: #222;
-  border-radius: 12px;
+  border-radius: 12px
 }
 
 .cell {
   background: #0a7a0a;
-  border-radius: 6px;
+  border-radius: 0;      
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
 }
+
 
 .danger {
-  background: #8b0000 !important;
+  position: relative;
+  background: #0a7a0a !important; 
 }
 
-/* ================= ENTITIES ================= */
+.danger::after {
+  content: "";
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 50%;
+  height: 4px;
+  background: red;
+  border-radius: 0px;
+  transform: translateY(-50%);
+}
+
+
 #entities {
   position: absolute;
   inset: 6px;
@@ -100,7 +113,7 @@ body {
   justify-content: center;
 }
 
-/* Turret */
+
 .turret {
   width: 38px;
   height: 38px;
@@ -108,7 +121,6 @@ body {
   border-radius: 6px;
 }
 
-/* Bullet */
 .bullet {
   width: 16px;
   height: 16px;
@@ -117,7 +129,6 @@ body {
   box-shadow: 0 0 6px rgba(139,69,19,.8);
 }
 
-/* Zombies */
 .zombie {
   width: 38px;
   height: 38px;
@@ -128,7 +139,7 @@ body {
 .armored { background:orange; }
 .heavy { background:#777; }
 
-/* ================= CONTROLS ================= */
+
 #controls {
   margin-top: 10px;
   display: flex;
@@ -143,8 +154,23 @@ body {
   background: #333;
   color: white;
 }
+#shop {
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: 0px;
+  display: flex;
+  gap: 10px;
+}
+#shop button {
+  width: 70px;
+  height: 48px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  background: #333;
+  color: white;
+}
 
-/* ================= OVERLAYS ================= */
 .overlay {
   position: absolute;
   inset: 0;
@@ -185,11 +211,14 @@ body {
   background:#555;
   color:#aaa;
 }
+
 </style>
 </head>
 
 <body>
-
+<audio id="upgrade" src="Upgrade.wav" preload="auto"></audio>
+<audio id="shot" src="GunShot.wav" preload="auto"></audio>
+<audio id="shoot" src="shoot.wav" preload="auto"></audio>
 <div id="game">
 
   <div id="topBar">
@@ -200,7 +229,7 @@ body {
     </div>
     <div id="cooldownBar"></div>
   </div>
-
+<div id="shop"> <button onclick="openUpgrades()">🛒</button></div>
   <div id="boardWrapper">
     <div id="board"></div>
     <div id="entities"></div>
@@ -214,10 +243,9 @@ body {
   </div>
 
   <div id="controls">
-    <button onclick="move(-1)">⬅</button>
-    <button onclick="shoot()">🔫</button>
-    <button onclick="move(1)">➡</button>
-    <button onclick="openUpgrades()">🛒</button>
+    <button onclick="move(-1)">«</button>
+    <button onclick="shoot()">+</button>
+    <button onclick="move(1)">»</button>
   </div>
 </div>
 
@@ -231,7 +259,7 @@ body {
 
 <script>
 /* ================= CONSTANTS ================= */
-const COLS=5, ROWS=10, TILE=60, LOOP=50;
+const COLS=5, ROWS=10, TILE=56, LOOP=50;
 
 /* ================= GRID ================= */
 const board=document.getElementById("board");
@@ -265,6 +293,22 @@ const upgrades=[
 ];
 upgrades.forEach(u=>u.lvl=0);
 
+/* ================== AUDIO ================== */
+function PlayUpgrade() {
+  const a = document.getElementById("upgrade");
+  a.currentTime = 0;
+  a.play();
+}
+function PlayShot() {
+  const a = document.getElementById("shot");
+  a.currentTime = 0;
+  a.play();
+}
+function PlayShoot() {
+  const a = document.getElementById("shoot");
+  a.currentTime = 0;
+  a.play();
+}
 /* ================= RESET ================= */
 function restart(){
   turretCol=2;
@@ -303,10 +347,12 @@ function move(d){
 }
 
 function shoot(){
-  if(!running||burstLeft<=0||coolingDown) return;
-
+  if(!running||burstLeft<=0||coolingDown)  return;
+  
   bullets.push({y:ROWS-1, prevY:ROWS-1, col:turretCol});
+  PlayShot();
   burstLeft--;
+  
 
   if(burstLeft===0){
     coolingDown=true;
@@ -390,6 +436,7 @@ function update(){
     for(let j=zombies.length-1;j>=0;j--){
       const z=zombies[j];
       if(b.col===z.col && b.prevY>=z.y && b.y<=z.y+.5){
+        PlayShoot();
         bullets.splice(i,1);
         z.hp--;
         if(knockback) z.y=Math.max(0,z.y-knockback);
@@ -491,6 +538,7 @@ function refreshUpgrades(){
         u.apply(u.vals[u.lvl]);
         u.lvl++;
         refreshUpgrades();
+        PlayUpgrade();
       };
     }
 
@@ -503,3 +551,4 @@ setInterval(refreshUpgrades,300);
 
 </body>
 </html>
+
