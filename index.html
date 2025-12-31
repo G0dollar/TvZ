@@ -136,8 +136,8 @@ for(let r=0;r<ROWS;r++){
 
 /* ================= STATE ================= */
 let turretCol=2, bullets=[], zombies=[], enemyBullets=[], kills=0, coins=10000, wave=1;
-let running=false, over=false, shootCooldown=3750, bulletSpeed=0.25, burst=1, burstLeft=1, coolingDown=false, cooldownStart=0;
-let waveTimer=0, spawnDelay=4000, coinMult=1, knockback=0;
+let running=false, over=false, spawning=false, shootCooldown=3750, bulletSpeed=0.25, burst=1, burstLeft=1, coolingDown=false, cooldownStart=0;
+let spawnTimeout, waveTimer=0, spawnDelay=4000, coinMult=1, knockback=0;
 
 /* ================= UPGRADES ================= */
 const upgrades=[
@@ -150,54 +150,32 @@ const upgrades=[
 
 /* ================= GAME ================= */
 function startGame(){
-document.getElementById("startScreen").style.display="none"; resetGame(); running=true; setTimeout(spawnZombie,1000);
+document.getElementById("startScreen").style.display="none"; resetGame(); 
 }
 function toggleInfo(){ 
   const t=document.getElementById("infoText"); t.style.display=t.style.display==="block"?"none":"block"; }
 function resetGame(){
-    // Reset turret
-    turretCol = 2;
-    bullets = [];
-    enemyBullets = [];
-    
-    // Reset zombies & miniboss
-    zombies = [];
-    
-    // Reset game stats
-    kills = 0;
-    coins = 0;        // adjust starting coins
-    wave = 1;
-    
-    // Reset cooldowns & shooting
-    burstLeft = burst;
-    coolingDown = false;
-    cooldownStart = 0;
+    // Clear previous spawn loop
+    clearTimeout(spawnTimeout);
+    spawning = false;
 
-    // Reset wave timers and spawn delays
-    waveTimer = 0;
-    spawnDelay = 4000;
-    
-    // Reset upgrades
+    // Reset game state
+    turretCol = 2; bullets = []; enemyBullets = []; zombies = [];
+    kills = 0; coins = 0; wave = 1;
+    burstLeft = burst; coolingDown = false; cooldownStart = 0;
+    waveTimer = 0; spawnDelay = 4000;
     upgrades.forEach(u => u.lvl = 0);
-    
-    // Reset UI
+
     document.getElementById("gameOver").style.display = "none";
     document.getElementById("bossBarContainer").style.display = "none";
-
-    // Reset start flags
-    running = true;
-    over = false;
-
-    // Draw initial cooldown bar
+    entities.innerHTML = "";
     drawCooldown();
 
-    // Clear entities visually
-    entities.innerHTML = "";
+    running = true; over = false;
 
-    // Start spawning zombies again
-    setTimeout(spawnZombie, 1000);
+    // Start spawn loop if not already running
+    spawnZombie();
 }
-
 /* ================= INPUT ================= */
 function move(d) {
   if(running) turretCol=Math.max(0,Math.min(COLS-1,turretCol+d)); }
@@ -234,22 +212,23 @@ function drawCooldown(){
 
 /* ================= SPAWN ================= */
 function spawnZombie(){
-  if(over) return;
-  if(running){
-    // Prevent normal zombies if miniboss is active
-    const minibossActive = zombies.some(z => z.type === "miniboss");
-    if(minibossActive) return;
+  if(over || !running) { spawning = false; return; }
+  spawning = true;
 
-    let z={ type:"basic", hp:1, speed:0.04, drop:[50,60] };
-    const r=Math.random();
+  // Prevent normal zombies if miniboss active
+  const minibossActive = zombies.some(z => z.type === "miniboss");
+  if(!minibossActive){
+    let z = { type:"basic", hp:1, speed:0.04, drop:[50,60] };
+    const r = Math.random();
     if(kills>=150 && r<0.02) z={ type:"heavy", hp:3, speed:0.03, drop:[90,120] };
     else if(kills>=50 && r<0.05) z={ type:"armored", hp:2, speed:0.04, drop:[70,90] };
     else if(kills>=25 && r<0.1) z={ type:"fast", hp:1, speed:0.1, drop:[60,80] };
-    z.col=Math.floor(Math.random()*COLS); z.y=0; zombies.push(z);
+    z.col = Math.floor(Math.random()*COLS); z.y = 0;
+    zombies.push(z);
   }
-  setTimeout(spawnZombie, spawnDelay);
-}
 
+  spawnTimeout = setTimeout(spawnZombie, spawnDelay);
+}
 function spawnMiniBoss(){
   zombies.push({ type:"miniboss", hp:Math.max(6,wave*2), maxHp:Math.max(6,wave*2), speed:0.01, y:0, cols:[1,2,3], drop:[800,1200], shootTimer:0 });
   document.getElementById("bossBarContainer").style.display="block";
