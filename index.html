@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Turret vs Zombies</title>
-
-<style> 
+<style>
 body {
   margin: 0;
   background: #0f0f0f;
@@ -14,213 +13,66 @@ body {
   display: flex;
   justify-content: center;
   height: 100vh;
-}
-
-#game {
-  width: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-
-#topBar { 
-   width: 100%; 
-   padding: 8px; 
-   display: flex; 
-   flex-direction: column; 
-   gap: 6px; 
-}
-
-#stats {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-}
-
-#cooldownBar {
-  display: grid;
-  grid-auto-flow: column;
-  gap: 4px;
-  height: 8px;
-}
-
-.cooldownSeg {
-  background: #333;
-  border-radius: 6px;
   overflow: hidden;
 }
-
-.cooldownSegFill {
-  height: 100%;
-  width: 0%;
-  background: gold;
-  transition: width 0.08s linear;
-}
-
-
-#boardWrapper {
-  position: relative;
-}
-
-#board {
-  display: grid;
-  grid-template-columns: repeat(5, 56px);
-  grid-template-rows: repeat(10, 56px);
-  gap: 0;
-  padding: 6px;
-  background: #222;
-  border-radius: 12px
-}
-
-.cell {
-  background: #0a7a0a;
-  border-radius: 0;      
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
-}
-
-
-.danger {
-  position: relative;
-  background: #0a7a0a !important; 
-}
-
-.danger::after {
-  content: "";
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 50%;
-  height: 4px;
-  background: red;
-  border-radius: 0px;
-  transform: translateY(-50%);
-}
-
-
-#entities {
-  position: absolute;
-  inset: 6px;
-  pointer-events: none;
-}
-
-.entity {
-  position: absolute;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-
-.turret {
-  width: 38px;
-  height: 38px;
-  background: black;
-  border-radius: 6px;
-}
-
-.bullet {
-  width: 16px;
-  height: 16px;
-  background: #8b4513;
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(139,69,19,.8);
-}
-
-.zombie {
-  width: 38px;
-  height: 38px;
-  border-radius: 6px;
-  border: 2px solid rgba(0,0,0,.35);
-}
-.basic { background:#2c6bff; }
-.armored { background:orange; }
-.heavy { background:#777; }
-
-
-#controls {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-#controls button {
-  width: 70px;
-  height: 48px;
-  font-size: 20px;
-  border-radius: 10px;
-  border: none;
-  background: #333;
-  color: white;
-}
-#shop {
-  margin-top: 10px;
-  margin-left: auto;
-  margin-right: 0px;
-  display: flex;
-  gap: 10px;
-}
-#shop button {
-  width: 70px;
-  height: 48px;
-  font-size: 20px;
-  border-radius: 10px;
-  border: none;
-  background: #333;
-  color: white;
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.75);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-
-.panel {
-  background: #1b1b1b;
-  padding: 16px;
-  border-radius: 12px;
-  width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.upgradeRow {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  background: #2a2a2a;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.upgradeRow button {
-  background: gold;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-weight: bold;
-}
-.upgradeRow button:disabled {
-  background:#555;
-  color:#aaa;
-}
-
+#game { width: 420px; display: flex; flex-direction: column; align-items: center; }
+#topBar { width: 100%; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+#stats { display: flex; justify-content: space-between; font-size: 14px; }
+#cooldownBar { display: grid; grid-auto-flow: column; gap: 4px; height: 12px; }
+.cooldownSeg { background: #333; border-radius: 6px; overflow: hidden; }
+.cooldownSegFill { height: 100%; width: 0%; background: gold; transition: width 0.1s linear; }
+#boardWrapper { position: relative; }
+#board { display: grid; grid-template-columns: repeat(5, 56px); grid-template-rows: repeat(10, 56px); gap: 0; padding: 6px; background: #222; border-radius: 12px }
+.cell { background: #0a7a0a; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15); }
+.danger { position: relative; background: #0a7a0a !important; }
+.danger::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; background: red; transform: translateY(-50%); }
+#entities { position: absolute; inset: 6px; pointer-events: none; }
+.entity { position: absolute; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
+.turret { position: relative; width: 38px; height: 38px; background: #111; border-radius: 50%; }
+.turret .nozzle { position: absolute; width: 10px; height: 18px; background: #111; top: -14px; left: 50%; transform: translateX(-50%); border-radius: 4px; }
+.turret.firing .nozzle { background: gold; }
+.bullet { width: 16px; height: 16px; background: #8b4513; border-radius: 50%; box-shadow: 0 0 6px rgba(139,69,19,.8); }
+.zombiebody { width: 38px; height: 38px; border-radius: 50%; background: #3e94de; border: 2px solid rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
+.zombie { width: 20px; height: 20px; border-radius: 50%; }
+.basic { background:cyan; } .armored { background:orange; } .heavy { background:#777; } .fast { background:#1b2a6d; }
+#controls { margin-top: 10px; display: flex; gap: 10px; }
+#controls button { width: 70px; height: 48px; font-size: 20px; border-radius: 10px; border: none; background: #333; color: white; cursor: pointer; }
+#shop { margin-top: 10px; margin-left: auto; display: flex; }
+#shop button { width: 70px; height: 48px; font-size: 20px; border-radius: 10px; border: none; background: #333; color: white; cursor: pointer; }
+.overlay { position: absolute; inset: 0; background: rgba(0,0,0,.8); display: none; justify-content: center; align-items: center; z-index: 100; }
+.panel { background: #1b1b1b; padding: 16px; border-radius: 12px; width: 320px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #444; }
+.upgradeRow { display: grid; grid-template-columns: 1fr auto; gap: 8px; background: #2a2a2a; padding: 8px; border-radius: 8px; }
+.upgradeRow button { background: gold; border: none; border-radius: 6px; padding: 6px 10px; font-weight: bold; cursor: pointer; }
+.upgradeRow button:disabled { background:#555; color:#aaa; cursor: default; }
+.startPanel { position: relative; background: #1b1b1b; border-radius: 14px; width: 320px; height: 420px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.startPanel h2 { margin-bottom: auto; margin-top: 0px; font-size: 30px; }
+.startBtn { width: 350px; height: 75px; font-size: 25px; border-radius: 12px; background: gold; border: none; cursor: pointer; margin-bottom: 120px; margin-top:auto; }
+.infoBtn { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; border: none; background: white; color: black; font-weight: bold; cursor: pointer; }
+.infoText { display: none; font-size: 14px; opacity: 0.85; margin-top: 24px; text-align: left; width: 100%; }
+#bossBarContainer { display:none; width:100%; height:12px; background:#333; border-radius:6px; margin-bottom:8px; border:1px solid #500; overflow:hidden; }
+#bossBarFill { width:100%; height:100%; background:linear-gradient(to right, #ff0000, #990000); transition: width 0.2s ease; }
 </style>
 </head>
-
 <body>
 <audio id="upgrade" src="Upgrade.wav" preload="auto"></audio>
 <audio id="shot" src="GunShot.wav" preload="auto"></audio>
 <audio id="shoot" src="Shoot.wav" preload="auto"></audio>
-<div id="game">
 
+<div id="startScreen" class="overlay" style="display:flex;">
+  <div class="startPanel">
+    <button class="infoBtn" onclick="toggleInfo()">i</button>
+    <h2>Turret vs Zombies</h2>
+    <button class="startBtn" onclick="startGame()">▶ Start</button>
+    <div id="infoText" class="infoText">
+      <p>• Move turret left/right</p>
+      <p>• Shoot zombies before they cross the red line</p>
+      <p>• Upgrade your turret to survive longer</p>
+      <p>• New zombie types unlock as you progress</p>
+    </div>
+  </div>
+</div>
+
+<div id="game">
   <div id="topBar">
     <div id="stats">
       <div id="kills">Kills: 0</div>
@@ -229,23 +81,23 @@ body {
     </div>
     <div id="cooldownBar"></div>
   </div>
-<div id="shop"> <button onclick="openUpgrades()">🛒</button></div>
+  <div id="shop"><button onclick="openUpgrades()">🛒</button></div>
+  <div id="bossBarContainer"><div id="bossBarFill"></div></div>
   <div id="boardWrapper">
     <div id="board"></div>
     <div id="entities"></div>
-
     <div id="gameOver" class="overlay">
       <div class="panel">
         <h2 style="color:red;margin:0">GAME OVER</h2>
-        <button onclick="restart()">Retry</button>
+        <button onclick="resetGame()">Retry</button>
       </div>
     </div>
   </div>
-
   <div id="controls">
     <button onclick="move(-1)">«</button>
     <button onclick="shoot()">+</button>
     <button onclick="move(1)">»</button>
+     <button onclick="reload()">⟳</button>
   </div>
 </div>
 
@@ -259,296 +111,218 @@ body {
 
 <script>
 /* ================= CONSTANTS ================= */
-const COLS=5, ROWS=10, TILE=56, LOOP=50;
+const COLS=5,ROWS=10,TILE=56,LOOP=50,WAVE_DURATION=20000;
+
+/* ================= DOM ================= */
+const killsEl=document.getElementById("kills");
+const coinsEl=document.getElementById("coins");
+const waveEl=document.getElementById("wave");
+const board=document.getElementById("board");
+const entities=document.getElementById("entities");
+const sndUpgrade=document.getElementById("upgrade");
+const sndShot=document.getElementById("shot");
+const sndShoot=document.getElementById("shoot");
+const play=a=>a?.play().catch(()=>{});
 
 /* ================= GRID ================= */
-const board=document.getElementById("board");
 for(let r=0;r<ROWS;r++){
   for(let c=0;c<COLS;c++){
-    const d=document.createElement("div");
-    d.className="cell";
-    if(r===ROWS-2) d.classList.add("danger");
-    board.appendChild(d);
+    const cell=document.createElement("div");
+    cell.className="cell";
+    if(r===ROWS-2) cell.classList.add("danger");
+    board.appendChild(cell);
   }
 }
 
 /* ================= STATE ================= */
-let turretCol, bullets, zombies;
-let kills, coins, running, over;
-
-let shootCooldown, bulletSpeed, burst, burstLeft;
-let knockback, coinMult;
-
-let coolingDown=false;
-let cooldownStart=0;
-let spawnDelay, armoredChance, heavyChance;
+let turretCol=2, bullets=[], zombies=[], enemyBullets=[], kills=0, coins=10000, wave=1;
+let running=false, over=false, shootCooldown=3750, bulletSpeed=0.25, burst=1, burstLeft=1, coolingDown=false, cooldownStart=0;
+let waveTimer=0, spawnDelay=4000, coinMult=1, knockback=0;
 
 /* ================= UPGRADES ================= */
 const upgrades=[
-  {name:"Cooldown", vals:[3250,2500,2000,1250,500], costs:[300,1e3,5e3,25e3,1e5], apply:v=>shootCooldown=v},
-  {name:"Bullet Speed", vals:[0.35,0.5,0.8,1.2,1.6], costs:[200,500,2500,1e4,25e3], apply:v=>bulletSpeed=v},
-  {name:"Burst", vals:[2,3,4], costs:[1e3,1e4,1e5], apply:v=>{burst=v;burstLeft=v}},
-  {name:"Coin Gain", vals:[1.5,2,3,4], costs:[750,4e3,25e3,75e3], apply:v=>coinMult=v},
-  {name:"Knockback", vals:[1,2,3], costs:[2e3,1e4,5e4], apply:v=>knockback=v}
+{ name:"Cooldown", vals:[3250,2500,2000,1250,500], costs:[300,1000,5000,25000,100000], lvl:0, apply:v=>shootCooldown=v },
+{ name:"Bullet Speed", vals:[0.35,0.5,0.8,1.2,1.6], costs:[200,500,2500,10000,25000], lvl:0, apply:v=>bulletSpeed=v },
+{ name:"Burst", vals:[2,3,4], costs:[1000,10000,100000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; cooldownStart=Date.now(); drawCooldown(); } },
+{ name:"Coin Gain", vals:[1.5,2,3,4], costs:[750,4000,25000,75000], lvl:0, apply:v=>coinMult=v },
+{ name:"Knockback", vals:[0.2,0.4,0.7], costs:[2000,10000,50000], lvl:0, apply:v=>knockback=v }
 ];
-upgrades.forEach(u=>u.lvl=0);
 
-/* ================== AUDIO ================== */
-function PlayUpgrade() {
-  const a = document.getElementById("upgrade");
-  a.currentTime = 0;
-  a.play();
+/* ================= GAME ================= */
+function startGame(){
+document.getElementById("startScreen").style.display="none"; resetGame(); running=true; setTimeout(spawnZombie,1000);
 }
-function PlayShot() {
-  const a = document.getElementById("shot");
-  a.currentTime = 0;
-  a.play();
+function toggleInfo(){ 
+  const t=document.getElementById("infoText"); t.style.display=t.style.display==="block"?"none":"block"; }
+function resetGame(){
+    // Reset turret
+    turretCol = 2;
+    bullets = [];
+    enemyBullets = [];
+    
+    // Reset zombies & miniboss
+    zombies = [];
+    
+    // Reset game stats
+    kills = 0;
+    coins = 0;        // adjust starting coins
+    wave = 1;
+    
+    // Reset cooldowns & shooting
+    burstLeft = burst;
+    coolingDown = false;
+    cooldownStart = 0;
+
+    // Reset wave timers and spawn delays
+    waveTimer = 0;
+    spawnDelay = 4000;
+    
+    // Reset upgrades
+    upgrades.forEach(u => u.lvl = 0);
+    
+    // Reset UI
+    document.getElementById("gameOver").style.display = "none";
+    document.getElementById("bossBarContainer").style.display = "none";
+
+    // Reset start flags
+    running = true;
+    over = false;
+
+    // Draw initial cooldown bar
+    drawCooldown();
+
+    // Clear entities visually
+    entities.innerHTML = "";
+
+    // Start spawning zombies again
+    setTimeout(spawnZombie, 1000);
 }
-function PlayShoot() {
-  const a = document.getElementById("shoot");
-  a.currentTime = 0;
-  a.play();
-}
-/* ================= RESET ================= */
-function restart(){
-  turretCol=2;
-  bullets=[];
-  zombies=[];
-  kills=0;
-  coins=0;
-
-  shootCooldown=3750;
-  bulletSpeed=0.25;
-  burst=1;
-  burstLeft=1;
-  knockback=0;
-  coinMult=1;
-
-  coolingDown=false;
-  cooldownStart=0;
-
-  spawnDelay=4000;
-  armoredChance=.25;
-  heavyChance=.1;
-
-  upgrades.forEach(u=>u.lvl=0);
-
-  running=true;
-  over=false;
-  document.getElementById("gameOver").style.display="none";
-  refreshUpgrades();
-}
-restart();
 
 /* ================= INPUT ================= */
-function move(d){
-  if(!running) return;
-  turretCol=Math.max(0,Math.min(COLS-1,turretCol+d));
-}
-
+function move(d) {
+  if(running) turretCol=Math.max(0,Math.min(COLS-1,turretCol+d)); }
 function shoot(){
-  if(!running||burstLeft<=0||coolingDown)  return;
-  
-  bullets.push({y:ROWS-1, prevY:ROWS-1, col:turretCol});
-  PlayShot();
-  burstLeft--;
-  
-
-  if(burstLeft===0){
-    coolingDown=true;
-    cooldownStart=Date.now();
-  }
+  if(!running || coolingDown || burstLeft<=0) return;
+  bullets.push({ col:turretCol, y:ROWS-1, prevY:ROWS-1 });
+  play(sndShot); burstLeft--;
+  turretEl?.querySelector(".turret")?.classList.add("firing");
+  setTimeout(()=>turretEl?.querySelector(".turret")?.classList.remove("firing"),100);
+  if(burstLeft===0){ coolingDown=true; cooldownStart=Date.now(); }
 }
+function reload(){ 
+  if(!running || coolingDown || burstLeft===burst) return; burstLeft=0; coolingDown=true; cooldownStart=Date.now(); drawCooldown(); }
 
 /* ================= COOLDOWN ================= */
 function updateCooldown(){
   if(!coolingDown) return;
-
-  const elapsed=Date.now()-cooldownStart;
-  const perSeg=shootCooldown/burst;
-  burstLeft=Math.min(burst,Math.floor(elapsed/perSeg));
-
-  if(burstLeft>=burst){
-    burstLeft=burst;
-    coolingDown=false;
-  }
+  const elapsed=Date.now()-cooldownStart,per=shootCooldown/burst;
+  burstLeft=Math.floor(elapsed/per);
+  if(burstLeft>=burst){ burstLeft=burst; coolingDown=false; }
+  drawCooldown();
 }
-
 function drawCooldown(){
-  const bar=document.getElementById("cooldownBar");
-  bar.innerHTML="";
-  const elapsed=Date.now()-cooldownStart;
-  const perSeg=shootCooldown/burst;
-
+  const bar=document.getElementById("cooldownBar"); bar.innerHTML="";
+  const per=shootCooldown/burst,elapsed=Date.now()-cooldownStart;
   for(let i=0;i<burst;i++){
-    const seg=document.createElement("div");
-    seg.className="cooldownSeg";
-    const fill=document.createElement("div");
-    fill.className="cooldownSegFill";
-
-    if(!coolingDown){
-      fill.style.width=i<burstLeft?"100%":"0%";
-    }else{
-      const prog=Math.min(1,Math.max(0,(elapsed-i*perSeg)/perSeg));
-      fill.style.width=(prog*100)+"%";
-    }
-
-    seg.appendChild(fill);
-    bar.appendChild(seg);
+    const seg=document.createElement("div"); seg.className="cooldownSeg";
+    const fill=document.createElement("div"); fill.className="cooldownSegFill";
+    if(!coolingDown) fill.style.width=i<burstLeft?"100%":"0%";
+    else fill.style.width=Math.min(1,Math.max(0,(elapsed-i*per)/per))*100+"%";
+    seg.appendChild(fill); bar.appendChild(seg);
   }
 }
 
 /* ================= SPAWN ================= */
 function spawnZombie(){
-  let z={type:"basic",hp:1};
-  const r=Math.random();
+  if(over) return;
+  if(running){
+    // Prevent normal zombies if miniboss is active
+    const minibossActive = zombies.some(z => z.type === "miniboss");
+    if(minibossActive) return;
 
-  if(kills>=150 && r<heavyChance){
-    z={type:"heavy",hp:3};
-    heavyChance=Math.min(.2,heavyChance+.001);
-  }else if(kills>=50 && r<armoredChance){
-    z={type:"armored",hp:2};
-    armoredChance=Math.min(.5,armoredChance+.001);
+    let z={ type:"basic", hp:1, speed:0.04, drop:[50,60] };
+    const r=Math.random();
+    if(kills>=150 && r<0.02) z={ type:"heavy", hp:3, speed:0.03, drop:[90,120] };
+    else if(kills>=50 && r<0.05) z={ type:"armored", hp:2, speed:0.04, drop:[70,90] };
+    else if(kills>=25 && r<0.1) z={ type:"fast", hp:1, speed:0.1, drop:[60,80] };
+    z.col=Math.floor(Math.random()*COLS); z.y=0; zombies.push(z);
   }
-
-  z.col=Math.floor(Math.random()*COLS);
-  z.y=0;
-  zombies.push(z);
+  setTimeout(spawnZombie, spawnDelay);
 }
 
-(function spawnLoop(){
-  if(!over){
-    spawnZombie();
-    spawnDelay=Math.max(800,spawnDelay-10);
-  }
-  setTimeout(spawnLoop,spawnDelay);
-})();
+function spawnMiniBoss(){
+  zombies.push({ type:"miniboss", hp:Math.max(6,wave*2), maxHp:Math.max(6,wave*2), speed:0.01, y:0, cols:[1,2,3], drop:[800,1200], shootTimer:0 });
+  document.getElementById("bossBarContainer").style.display="block";
+  document.getElementById("bossBarFill").style.width="100%";
+}
 
 /* ================= UPDATE ================= */
 function update(){
   updateCooldown();
+  waveTimer+=LOOP;
+  if(waveTimer>=WAVE_DURATION){ wave++; waveTimer=0; spawnDelay=Math.max(800,spawnDelay-300); if(wave%5===0) spawnMiniBoss(); }
 
-  zombies.forEach(z=>z.y+=0.04);
-  bullets.forEach(b=>{b.prevY=b.y; b.y-=bulletSpeed;});
+  zombies.forEach(z=>{
+    z.y+=z.speed;
+    if(z.type==="miniboss"){ z.shootTimer+=LOOP; if(z.shootTimer>2000){ z.shootTimer=0; [1,3].forEach(c=>enemyBullets.push({ col:c, y:z.y+1 })); } }
+    if(z.y>=ROWS-2) endGame();
+  });
+
+  bullets.forEach(b=>{ b.prevY=b.y; b.y-=bulletSpeed; });
+  enemyBullets.forEach(b=>{ b.y+=0.15; if(b.y>=ROWS-1 && b.col===turretCol) endGame(); });
 
   for(let i=bullets.length-1;i>=0;i--){
-    const b=bullets[i];
     for(let j=zombies.length-1;j>=0;j--){
-      const z=zombies[j];
-      if(b.col===z.col && b.prevY>=z.y && b.y<=z.y+.5){
-        PlayShoot();
-        bullets.splice(i,1);
-        z.hp--;
-        if(knockback) z.y=Math.max(0,z.y-knockback);
-
-        if(z.hp<=0){
-          zombies.splice(j,1);
-          kills++;
-          let drop=50+Math.random()*10;
-          if(z.type==="armored") drop=90+Math.random()*20;
-          if(z.type==="heavy") drop=150+Math.random()*30;
-          coins+=Math.floor(drop*coinMult);
-        }else{
-          z.type=z.type==="heavy"?"armored":"basic";
-        }
+      const b=bullets[i], z=zombies[j];
+      const hit=z.cols?z.cols.includes(b.col):b.col===z.col;
+      if(hit && b.y<=z.y+0.5 && b.prevY>=z.y){
+        z.hp--; z.y=Math.max(0,z.y-knockback); bullets.splice(i,1); play(sndShoot);
+        if(z.type==="miniboss") document.getElementById("bossBarFill").style.width=(z.hp/z.maxHp)*100+"%";
+        if(z.hp<=0){ coins+=Math.floor((Math.random()*(z.drop[1]-z.drop[0]+1)+z.drop[0])*coinMult); if(z.type==="miniboss") document.getElementById("bossBarContainer").style.display="none"; zombies.splice(j,1); kills++; }
         break;
       }
     }
-    if(bullets[i]&&b.y<0) bullets.splice(i,1);
   }
-
-  zombies.forEach(z=>{ if(z.y>=ROWS-2) endGame(); });
 }
 
 /* ================= DRAW ================= */
+let turretEl;
 function draw(){
-  const ent=document.getElementById("entities");
-  ent.innerHTML="";
-
-  bullets.forEach(b=>{
-    const d=document.createElement("div");
-    d.className="entity";
-    d.style.transform=`translate(${b.col*TILE}px,${b.y*TILE}px)`;
-    d.innerHTML='<div class="bullet"></div>';
-    ent.appendChild(d);
-  });
-
+  entities.innerHTML="";
+  bullets.forEach(b=>renderEntity(b.col,b.y,'<div class="bullet"></div>'));
+  enemyBullets.forEach(b=>renderEntity(b.col,b.y,'<div class="bullet" style="background:red"></div>'));
   zombies.forEach(z=>{
-    const d=document.createElement("div");
-    d.className="entity";
-    d.style.transform=`translate(${z.col*TILE}px,${z.y*TILE}px)`;
-    d.innerHTML=`<div class="zombie ${z.type}"></div>`;
-    ent.appendChild(d);
+    if(z.type==="miniboss") z.cols.forEach(c=>renderEntity(c,z.y,'<div class="zombiebody" style="background:#500"><div class="zombie heavy"></div></div>'));
+    else renderEntity(z.col,z.y,`<div class="zombiebody"><div class="zombie ${z.type}"></div></div>`);
   });
-
-  const t=document.createElement("div");
-  t.className="entity";
-  t.style.transform=`translate(${turretCol*TILE}px,${(ROWS-1)*TILE}px)`;
-  t.innerHTML='<div class="turret"></div>';
-  ent.appendChild(t);
-
-  document.getElementById("kills").textContent=`Kills: ${kills}`;
-  document.getElementById("coins").textContent=`Coins: ${coins}`;
-  document.getElementById("wave").textContent=`Wave: ${Math.floor(kills/25)+1}`;
-
-  drawCooldown();
+  renderEntity(turretCol,ROWS-1,'<div class="turret"><div class="nozzle"></div></div>');
+  killsEl.textContent=`Kills: ${kills}`; coinsEl.textContent=`Coins: ${coins}`; waveEl.textContent=`Wave: ${wave}`;
 }
+function renderEntity(c,y,html){
+  const d=document.createElement("div"); d.className="entity"; d.style.transform=`translate(${c*TILE}px,${y*TILE}px)`; d.innerHTML=html; entities.appendChild(d); }
 
 /* ================= LOOP ================= */
-setInterval(()=>{ if(running&&!over){update();draw();}},LOOP);
+setInterval(()=>{ if(running&&!over){ update(); draw(); } },LOOP);
 
 /* ================= UI ================= */
-function endGame(){
-  running=false;
-  over=true;
-  document.getElementById("gameOver").style.display="flex";
-}
-
+function endGame(){ 
+  running=false; over=true; document.getElementById("gameOver").style.display="flex"; }
 function openUpgrades(){
-  running=false;
-  document.getElementById("upgradeOverlay").style.display="flex";
-}
-
-function closeUpgrades(){
-  running=true;
-  document.getElementById("upgradeOverlay").style.display="none";
-}
-
+  running=false; refreshUpgrades(); document.getElementById("upgradeOverlay").style.display="flex"; }
+function closeUpgrades(){ 
+  running=true; document.getElementById("upgradeOverlay").style.display="none"; }
 function refreshUpgrades(){
-  const list=document.getElementById("upgradeList");
-  list.innerHTML="";
+  const list=document.getElementById("upgradeList"); list.innerHTML="";
   upgrades.forEach(u=>{
-    const row=document.createElement("div");
-    row.className="upgradeRow";
-
-    const info=document.createElement("div");
-    const cur=u.lvl?u.vals[u.lvl-1]:"Base";
-    const next=u.lvl<u.vals.length?u.vals[u.lvl]:"MAX";
-    info.innerHTML=`<b>${u.name}</b><br>Current: ${cur}<br>Next: ${next}`;
-
+    const row=document.createElement("div"); row.className="upgradeRow";
+    const info=document.createElement("div"); info.innerHTML=`<b>${u.name}</b><br>Lvl ${u.lvl}`;
     const btn=document.createElement("button");
-    if(u.lvl>=u.vals.length){
-      btn.textContent="MAX";
-      btn.disabled=true;
-    }else{
-      btn.textContent=u.costs[u.lvl];
-      btn.disabled=coins<u.costs[u.lvl];
-      btn.onclick=()=>{
-        coins-=u.costs[u.lvl];
-        u.apply(u.vals[u.lvl]);
-        u.lvl++;
-        refreshUpgrades();
-        PlayUpgrade();
-      };
-    }
-
-    row.append(info,btn);
-    list.appendChild(row);
+    if(u.lvl>=u.vals.length){ btn.textContent="MAX"; btn.disabled=true; }
+    else{ const cost=u.costs[u.lvl]; btn.textContent=cost; btn.disabled=coins<cost; btn.onclick=()=>{ coins-=cost; u.apply(u.vals[u.lvl]); u.lvl++; play(sndUpgrade); refreshUpgrades(); }; }
+    row.append(info,btn); list.appendChild(row);
   });
 }
-setInterval(refreshUpgrades,300);
 </script>
-
 </body>
 </html>
 
