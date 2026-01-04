@@ -398,7 +398,7 @@ const upgrades = [
   { name:"Fire Rate", vals:[3250,2500,1800,1000,650,250], costs:[200,500,1000,7500,10000,50000], lvl:0, apply:v=>shootCooldown=v },
   { name:"Bullet Speed", vals:[0.4,0.7,1.2,1.8,2.5], costs:[200,600,3000,10000,50000], lvl:0, apply:v=>bulletSpeed=v },
   { name:"Burst Ammo", vals:[2,3,4,5], costs:[800,4000,15000,60000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; } },
-  { name:"Coin Gain", vals:[1.5,2,3,5], costs:[500,3000,10000,50000], lvl:0, apply:v=>coinMult=v },
+  { name:"Coin Gain", vals:[1.5,2,3,5,7], costs:[500,2500,7500,15000,60000], lvl:0, apply:v=>coinMult=v },
   { name:"Knockback", vals:[0.2,0.5,0.8,1.2], costs:[1200,6000,25000,750000], lvl:0, apply:v=>knockback=v }
 ];
 
@@ -502,7 +502,7 @@ function spawnZombie(){
 
     if(kills>=100 && r<0.03) z={ type:"heavy", hp:4, speed:0.02, drop:[150,200] };
     else if(kills>=50 && r<0.08) z={ type:"armored", hp:2, speed:0.04, drop:[80,110] };
-    else if(kills>=20 && r<0.12) z={ type:"fast", hp:1, speed:0.12, drop:[50,70] };
+    else if(kills>=20 && r<0.12) z={ type:"fast", hp:1, speed:0.08, drop:[50,70] };
 
     z.col = Math.floor(Math.random()*COLS);
     z.y = -1;
@@ -515,8 +515,8 @@ function spawnZombie(){
 function spawnMiniBoss(){
   zombies.push({
     type: "miniboss",
-    hp: 10 + (wave * 2),
-    maxHp: 10 + (wave * 2),
+    hp: (wave * 1),
+    maxHp: (wave * 1),
     speed: 0.015,
     y: -1,
     cols: [1, 2, 3],
