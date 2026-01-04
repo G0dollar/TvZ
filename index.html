@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Turret vs Zombies: V1</title>
+<title>Turret vs Zombies: Definitive Edition</title>
 <style>
 :root {
   --gold: #ffd700;
@@ -15,7 +15,7 @@
 body {
   margin: 0;
   background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
   color: white;
   display: flex;
   justify-content: center;
@@ -26,14 +26,14 @@ body {
 
 #game { width: 420px; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-/* Stats & UI */
-#topBar { width: 100%; padding: 10px; box-sizing: border-box; background: rgba(0,0,0,0.4); border-radius: 12px; margin-bottom: 10px; }
-#stats { display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; color: var(--gold); text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-#cooldownBar { display: grid; grid-auto-flow: column; gap: 4px; height: 10px; margin-top: 8px; }
+/* Top UI Section */
+#topBar { width: 100%; padding: 12px; box-sizing: border-box; background: rgba(0,0,0,0.6); border-radius: 12px; margin-bottom: 10px; border: 1px solid #333; }
+#stats { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: center; font-weight: bold; font-size: 14px; color: var(--gold); }
+#cooldownBar { display: grid; grid-auto-flow: column; gap: 4px; height: 10px; margin-top: 10px; }
 .cooldownSeg { background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #333; }
 .cooldownSegFill { height: 100%; width: 0%; background: linear-gradient(to right, #ffae00, var(--gold)); transition: width 0.1s linear; }
 
-/* Game Board */
+/* Board */
 #boardWrapper { position: relative; transition: transform 0.1s; }
 #board { 
   display: grid; 
@@ -49,56 +49,43 @@ body {
 .danger { position: relative; background: #2e1a1a !important; }
 .danger::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; background: #ff4444; box-shadow: 0 0 10px #ff0000; transform: translateY(-50%); }
 
-/* Entities */
+/* Entities & FX */
 #entities { position: absolute; inset: 6px; pointer-events: none; }
-.entity { position: absolute; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; transition: transform 0.05s linear; }
-
-/* Animations */
-@keyframes hitFlash {
-  0% { filter: brightness(4) saturate(2); transform: scale(1.1); }
-  100% { filter: brightness(1) saturate(1); transform: scale(1); }
-}
-.hit { animation: hitFlash 0.15s ease-out; }
-
-@keyframes shake {
-  0% { transform: translate(2px, 2px); }
-  25% { transform: translate(-2px, -2px); }
-  50% { transform: translate(2px, -2px); }
-  100% { transform: translate(0, 0); }
-}
-.shake { animation: shake 0.1s cubic-bezier(.36,.07,.19,.97) both; }
-
-/* Visuals */
+.entity { position: absolute; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
 .bullet { width: 14px; height: 14px; background: var(--bullet); border-radius: 50%; box-shadow: 0 0 10px #fff, 0 0 20px var(--gold); }
 .turret { position: relative; width: 40px; height: 40px; background: linear-gradient(135deg, #333, #111); border-radius: 50%; border: 2px solid #444; }
 .turret .nozzle { position: absolute; width: 12px; height: 20px; background: #222; top: -15px; left: 50%; transform: translateX(-50%); border-radius: 3px; border: 1px solid #444; }
 .firing .nozzle { background: var(--gold) !important; box-shadow: 0 0 15px var(--gold); }
 
-.zombiebody { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(0,0,0,0.5); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+.zombiebody { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(0,0,0,0.5); }
 .zombie { width: 22px; height: 22px; border-radius: 50%; }
-.basic { background: #4ecdc4; }
-.armored { background: #f77f00; border: 2px solid #fff; }
-.heavy { background: #444; border: 2px solid #999; }
-.fast { background: #ff0054; }
+.basic { background: #4ecdc4; } .armored { background: #f77f00; border: 2px solid #fff; }
+.heavy { background: #444; border: 2px solid #999; } .fast { background: #ff0054; }
 
-/* UI Buttons */
-#controls { margin-top: 15px; display: flex; gap: 15px; }
-button { 
-  background: #222; color: white; border: 1px solid #444; border-radius: 12px; 
-  cursor: pointer; transition: all 0.2s; font-weight: bold;
-}
-button:hover { background: #333; border-color: var(--gold); }
-#controls button { width: 75px; height: 55px; font-size: 24px; }
-#shopBtn { position: absolute; right: -60px; top: 10px; width: 50px; height: 50px; font-size: 20px; }
+/* Animations */
+@keyframes hitFlash { 0% { filter: brightness(4); } 100% { filter: brightness(1); } }
+.hit { animation: hitFlash 0.15s ease-out; }
+@keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(2px,2px); } 50% { transform: translate(-2px,1px); } }
+.shake { animation: shake 0.1s ease-in-out; }
+
+/* UI Elements */
+#controls { margin-top: 15px; display: flex; gap: 10px; width: 100%; }
+button { background: #222; color: white; border: 1px solid #444; border-radius: 12px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+button:active { transform: scale(0.95); }
+#controls button { height: 55px; font-size: 24px; flex: 1; }
+#shopBtn { background: #333; border-color: var(--gold); width: 45px; height: 35px; font-size: 18px; }
 
 /* Overlays */
-.overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
-.panel { background: #1a1a1c; padding: 25px; border-radius: 20px; width: 320px; border: 1px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-.upgradeRow { display: flex; justify-content: space-between; align-items: center; background: #252528; padding: 12px; border-radius: 12px; margin-bottom: 8px; }
-.upgradeRow button { background: var(--gold); color: black; padding: 8px 15px; border: none; }
+.overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+.panel { background: #1a1a1c; padding: 25px; border-radius: 20px; width: 320px; border: 1px solid #333; position: relative; }
+.upgradeRow { display: flex; justify-content: space-between; align-items: center; background: #252528; padding: 10px; border-radius: 12px; margin-bottom: 8px; }
+.upgradeRow button { background: var(--gold); color: black; padding: 6px 12px; border: none; font-size: 14px; }
 .upgradeRow button:disabled { background: #444; color: #888; }
 
-#bossBarContainer { display:none; width:100%; height:10px; background:#200; border-radius:5px; margin-bottom:10px; border:1px solid #500; overflow:hidden; }
+#infoBox { display: none; text-align: left; background: #000; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 13px; line-height: 1.4; border: 1px solid #444; }
+.info-toggle { position: absolute; top: 15px; right: 15px; background: none; border: 1px solid #fff; border-radius: 50%; width: 25px; height: 25px; font-size: 14px; }
+
+#bossBarContainer { display:none; width:100%; height:8px; background:#200; border-radius:4px; margin-bottom:10px; overflow:hidden; border: 1px solid #500; }
 #bossBarFill { width:100%; height:100%; background: linear-gradient(to right, #ff0000, #900); }
 </style>
 </head>
@@ -106,9 +93,19 @@ button:hover { background: #333; border-color: var(--gold); }
 
 <div id="startScreen" class="overlay" style="display:flex;">
   <div class="panel" style="text-align: center;">
-    <h1 style="color:var(--gold); margin-top:0;">TURRET DEFENSE</h1>
-    <p style="opacity:0.7">Defend the line at all costs.</p>
-    <button onclick="startGame()" style="width:100%; height:60px; background:var(--gold); color:black; font-size:20px; margin-top:20px;">DEPLOY</button>
+    <button class="info-toggle" onclick="toggleInfo()">i</button>
+    <h1 style="color:var(--gold); margin: 0 0 10px 0;">TURRET DEFENSE</h1>
+    <p style="opacity:0.7; margin-bottom: 20px;">Protect the perimeter.</p>
+    
+    <button onclick="startGame()" style="width:100%; height:60px; background:var(--gold); color:black; font-size:20px;">START GAME</button>
+    
+    <div id="infoBox">
+      <strong>HOW TO PLAY:</strong><br>
+      • Use ◀ ▶ to move your turret.<br>
+      • Tap FIRE to destroy zombies.<br>
+      • Don't let them reach the red line!<br>
+      • Use 🛒 to upgrade speed, damage, and fire rate.
+    </div>
   </div>
 </div>
 
@@ -118,11 +115,11 @@ button:hover { background: #333; border-color: var(--gold); }
       <div id="kills">KILLS: 0</div>
       <div id="wave">WAVE: 1</div>
       <div id="coins">COINS: 0</div>
+      <button id="shopBtn" onclick="openUpgrades()">🛒</button>
     </div>
     <div id="cooldownBar"></div>
   </div>
   
-  <button id="shopBtn" onclick="openUpgrades()">🛒</button>
   <div id="bossBarContainer"><div id="bossBarFill"></div></div>
 
   <div id="boardWrapper">
@@ -130,38 +127,46 @@ button:hover { background: #333; border-color: var(--gold); }
     <div id="entities"></div>
     <div id="gameOver" class="overlay">
       <div class="panel" style="text-align:center">
-        <h2 style="color:#ff4444; margin-top:0">MISSION FAILED</h2>
+        <h2 style="color:#ff4444; margin-top:0">GAME OVER</h2>
         <p id="finalScore"></p>
-        <button onclick="resetGame()" style="width:100%; height:50px; background:#fff; color:black;">RETRY</button>
+        <button onclick="resetGame()" style="width:100%; height:50px; background:#fff; color:black;">TRY AGAIN</button>
       </div>
     </div>
   </div>
 
   <div id="controls">
     <button onclick="move(-1)">◀</button>
-    <button onclick="shoot()" style="background:var(--gold); color:black; flex-grow:1;">FIRE</button>
+    <button onclick="shoot()" style="background:var(--gold); color:black; flex: 2;">FIRE</button>
     <button onclick="move(1)">▶</button>
-    <button onclick="reload()" style="font-size:18px;">⟳</button>
+    <button onclick="reload()">⟳</button>
   </div>
 </div>
 
 <div id="upgradeOverlay" class="overlay">
   <div class="panel">
-    <h3 style="margin-top:0; color:var(--gold)">ARMORY UPGRADES</h3>
+    <h3 style="margin-top:0; color:var(--gold)">SHOP / UPGRADES</h3>
     <div id="upgradeList"></div>
-    <button onclick="closeUpgrades()" style="width:100%; margin-top:15px; height:40px;">RETURN TO BATTLE</button>
+    <button onclick="closeUpgrades()" style="width:100%; margin-top:15px; height:40px;">BACK TO GAME</button>
   </div>
 </div>
 
 <script>
-/* ================= STATE & CONSTANTS ================= */
+/* ================= GAME LOGIC ================= */
 const COLS=5, ROWS=10, TILE=56, LOOP=50, WAVE_DURATION=20000;
-let turretCol=2, bullets=[], zombies=[], enemyBullets=[], kills=0, coins=0, wave=1;
-let running=false, over=false, spawning=false;
+let turretCol=2, bullets=[], zombies=[], enemyBullets=[], kills=0, coins=100, wave=1;
+let running=false, over=false;
 let shootCooldown=3500, bulletSpeed=0.3, burst=1, burstLeft=1, coolingDown=false, cooldownStart=0;
 let spawnTimeout, waveTimer=0, spawnDelay=4000, coinMult=1, knockback=0;
 
-/* ================= GRID INIT ================= */
+// Upgrades
+const upgrades=[
+  { name:"Fire Rate", vals:[3000,2000,1200,600,350], costs:[250,1000,5000,15000,50000], lvl:0, apply:v=>shootCooldown=v },
+  { name:"Bullet Speed", vals:[0.4,0.7,1.2,1.8], costs:[100,600,3000,10000], lvl:0, apply:v=>bulletSpeed=v },
+  { name:"Burst Ammo", vals:[2,3,4,6], costs:[800,4000,15000,60000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; } },
+  { name:"Coin Gain", vals:[1.5,2,3,5], costs:[500,3000,10000,50000], lvl:0, apply:v=>coinMult=v },
+  { name:"Knockback", vals:[0.2,0.5,0.8], costs:[1200,6000,25000], lvl:0, apply:v=>knockback=v }
+];
+
 const board = document.getElementById("board");
 for(let r=0; r<ROWS; r++){
   for(let c=0; c<COLS; c++){
@@ -171,24 +176,19 @@ for(let r=0; r<ROWS; r++){
   }
 }
 
-const upgrades=[
-  { name:"Fire Rate", vals:[3000,2200,1500,800,400], costs:[250,800,3000,12000,50000], lvl:0, apply:v=>shootCooldown=v },
-  { name:"Bullet Speed", vals:[0.4,0.6,0.9,1.4], costs:[150,500,2000,8000], lvl:0, apply:v=>bulletSpeed=v },
-  { name:"Burst Capacity", vals:[2,3,4,5], costs:[1000,5000,20000,80000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; } },
-  { name:"Bounty", vals:[1.5,2,3,5], costs:[500,2500,15000,60000], lvl:0, apply:v=>coinMult=v },
-  { name:"Stopping Power", vals:[0.2,0.4,0.7], costs:[1500,7000,30000], lvl:0, apply:v=>knockback=v }
-];
+function toggleInfo() {
+  const box = document.getElementById("infoBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+}
 
-/* ================= CORE LOGIC ================= */
 function startGame(){ document.getElementById("startScreen").style.display="none"; resetGame(); }
 
 function resetGame(){
   clearTimeout(spawnTimeout);
-  turretCol=2; bullets=[]; enemyBullets=[]; zombies=[]; kills=0; coins=0; wave=1; waveTimer=0;
+  turretCol=2; bullets=[]; enemyBullets=[]; zombies=[]; kills=0; coins=100; wave=1; waveTimer=0;
   burstLeft=burst; coolingDown=false; spawnDelay=4000;
   document.getElementById("gameOver").style.display="none";
   document.getElementById("bossBarContainer").style.display="none";
-  document.getElementById("entities").innerHTML="";
   running=true; over=false;
   spawnZombie();
 }
@@ -200,14 +200,8 @@ function shoot(){
   bullets.push({ col:turretCol, y:ROWS-1, prevY:ROWS-1 });
   burstLeft--;
   
-  // Screen Shake & Muzzle Flash
   const bw = document.getElementById("boardWrapper");
   bw.classList.remove("shake"); void bw.offsetWidth; bw.classList.add("shake");
-  
-  const entities = document.getElementById("entities");
-  const turretDiv = entities.querySelector('.turret-wrapper');
-  if(turretDiv) turretDiv.classList.add("firing");
-  setTimeout(()=>turretDiv?.classList.remove("firing"), 100);
 
   if(burstLeft===0){ coolingDown=true; cooldownStart=Date.now(); }
   drawCooldown();
@@ -222,7 +216,7 @@ function spawnZombie(){
     let z = { type:"basic", hp:1, speed:0.04, drop:[40,60], isHit:false };
     const r = Math.random();
     if(kills>=100 && r<0.03) z={ type:"heavy", hp:4, speed:0.02, drop:[150,200] };
-    else if(kills>=50 && r<0.07) z={ type:"armored", hp:2, speed:0.04, drop:[80,110] };
+    else if(kills>=50 && r<0.08) z={ type:"armored", hp:2, speed:0.04, drop:[80,110] };
     else if(kills>=20 && r<0.12) z={ type:"fast", hp:1, speed:0.12, drop:[50,70] };
     z.col = Math.floor(Math.random()*COLS); z.y = -1;
     zombies.push(z);
@@ -236,7 +230,6 @@ function spawnMiniBoss(){
 }
 
 function update(){
-  // Cooldown Logic
   if(coolingDown){
     const elapsed = Date.now() - cooldownStart;
     const per = shootCooldown / burst;
@@ -247,11 +240,10 @@ function update(){
 
   waveTimer += LOOP;
   if(waveTimer >= WAVE_DURATION){
-    wave++; waveTimer=0; spawnDelay = Math.max(700, spawnDelay-400);
+    wave++; waveTimer=0; spawnDelay = Math.max(800, spawnDelay-400);
     if(wave % 3 === 0) spawnMiniBoss();
   }
 
-  // Entities Move
   zombies.forEach(z => {
     z.y += z.speed;
     if(z.type === "miniboss"){
@@ -270,9 +262,7 @@ function update(){
     if(Math.abs(b.y - (ROWS-1)) < 0.2 && b.col === turretCol) endGame(); 
   });
 
-  // Collisions
   for(let i=bullets.length-1; i>=0; i--){
-    let hitAny = false;
     for(let j=zombies.length-1; j>=0; j--){
       const b=bullets[i], z=zombies[j];
       const colHit = z.cols ? z.cols.includes(b.col) : b.col === z.col;
@@ -280,7 +270,6 @@ function update(){
         z.hp--; z.isHit = true;
         z.y = Math.max(-1, z.y - knockback);
         bullets.splice(i,1);
-        hitAny = true;
         if(z.type === "miniboss") document.getElementById("bossBarFill").style.width = (z.hp/z.maxHp)*100+"%";
         if(z.hp <= 0){
           coins += Math.floor((Math.random()*(z.drop[1]-z.drop[0])+z.drop[0])*coinMult);
@@ -290,84 +279,60 @@ function update(){
         break;
       }
     }
-    if(!hitAny && bullets[i] && bullets[i].y < -1) bullets.splice(i,1);
   }
 }
 
-/* ================= RENDERER ================= */
 function draw(){
   const container = document.getElementById("entities");
   container.innerHTML = "";
-
   bullets.forEach(b => renderAt(b.col, b.y, '<div class="bullet"></div>'));
-  enemyBullets.forEach(b => renderAt(b.col, b.y, '<div class="bullet" style="background:#ff4444; box-shadow:0 0 10px #f00;"></div>'));
-
+  enemyBullets.forEach(b => renderAt(b.col, b.y, '<div class="bullet" style="background:#f00;box-shadow:0 0 10px #f00"></div>'));
   zombies.forEach(z => {
-    const hitClass = z.isHit ? " hit" : "";
-    if(z.type === "miniboss"){
-      z.cols.forEach(c => renderAt(c, z.y, `<div class="zombiebody${hitClass}" style="background:#500; border-color:var(--gold);"><div class="zombie heavy"></div></div>`));
-    } else {
-      renderAt(z.col, z.y, `<div class="zombiebody${hitClass}"><div class="zombie ${z.type}"></div></div>`);
-    }
+    const hit = z.isHit ? " hit" : "";
+    if(z.type === "miniboss") z.cols.forEach(c => renderAt(c, z.y, `<div class="zombiebody${hit}" style="background:#500;border-color:gold"><div class="zombie heavy"></div></div>`));
+    else renderAt(z.col, z.y, `<div class="zombiebody${hit}"><div class="zombie ${z.type}"></div></div>`);
     z.isHit = false;
   });
-
-  renderAt(turretCol, ROWS-1, '<div class="turret"><div class="nozzle"></div></div>', "turret-wrapper");
-
+  renderAt(turretCol, ROWS-1, `<div class="turret ${burstLeft > 0 ? 'firing' : ''}"><div class="nozzle"></div></div>`);
   document.getElementById("kills").textContent = `KILLS: ${kills}`;
   document.getElementById("coins").textContent = `COINS: ${coins}`;
   document.getElementById("wave").textContent = `WAVE: ${wave}`;
 }
 
-function renderAt(c, y, html, customClass=""){
-  const d = document.createElement("div");
-  d.className = "entity " + customClass;
-  d.style.transform = `translate(${c*TILE}px, ${y*TILE}px)`;
-  d.innerHTML = html;
+function renderAt(c, y, html){
+  const d = document.createElement("div"); d.className = "entity";
+  d.style.transform = `translate(${c*TILE}px, ${y*TILE}px)`; d.innerHTML = html;
   document.getElementById("entities").appendChild(d);
 }
 
 function drawCooldown(){
-  const bar = document.getElementById("cooldownBar");
-  bar.innerHTML = "";
+  const bar = document.getElementById("cooldownBar"); bar.innerHTML = "";
   for(let i=0; i<burst; i++){
     const seg = document.createElement("div"); seg.className="cooldownSeg";
     const fill = document.createElement("div"); fill.className="cooldownSegFill";
     if(!coolingDown) fill.style.width = i < burstLeft ? "100%" : "0%";
     else {
       const per = shootCooldown/burst;
-      const elapsed = Date.now() - cooldownStart;
-      fill.style.width = Math.min(100, Math.max(0, (elapsed - i*per)/per * 100)) + "%";
+      fill.style.width = Math.min(100, (Date.now() - cooldownStart - i*per)/per * 100) + "%";
     }
     seg.appendChild(fill); bar.appendChild(seg);
   }
 }
 
-/* ================= UI MGMT ================= */
-function endGame(){ 
-  running=false; over=true; 
-  document.getElementById("gameOver").style.display="flex";
-  document.getElementById("finalScore").textContent = `You survived to Wave ${wave} with ${kills} kills.`;
-}
+function endGame(){ running=false; over=true; document.getElementById("gameOver").style.display="flex"; document.getElementById("finalScore").textContent = `Kills: ${kills} | Wave: ${wave}`; }
 function openUpgrades(){ running=false; refreshUpgrades(); document.getElementById("upgradeOverlay").style.display="flex"; }
 function closeUpgrades(){ running=true; document.getElementById("upgradeOverlay").style.display="none"; }
 
 function refreshUpgrades(){
-  const list = document.getElementById("upgradeList");
-  list.innerHTML = "";
+  const list = document.getElementById("upgradeList"); list.innerHTML = "";
   upgrades.forEach(u => {
     const row = document.createElement("div"); row.className="upgradeRow";
-    const cost = u.costs[u.lvl];
-    const isMax = u.lvl >= u.vals.length;
-    row.innerHTML = `<div><div style="font-size:14px; color:var(--gold)">${u.name}</div><div style="font-size:11px; opacity:0.6">Level ${u.lvl}</div></div>`;
-    const btn = document.createElement("button");
-    btn.textContent = isMax ? "MAX" : cost;
+    const cost = u.costs[u.lvl], isMax = u.lvl >= u.vals.length;
+    row.innerHTML = `<div><div style="color:var(--gold)">${u.name}</div><div style="font-size:10px;opacity:0.6">LVL ${u.lvl}</div></div>`;
+    const btn = document.createElement("button"); btn.textContent = isMax ? "MAX" : cost;
     btn.disabled = isMax || coins < cost;
-    btn.onclick = () => {
-      coins -= cost; u.apply(u.vals[u.lvl]); u.lvl++; refreshUpgrades();
-    };
-    row.appendChild(btn);
-    list.appendChild(row);
+    btn.onclick = () => { coins -= cost; u.apply(u.vals[u.lvl]); u.lvl++; refreshUpgrades(); };
+    row.appendChild(btn); list.appendChild(row);
   });
 }
 
