@@ -379,7 +379,7 @@ let running = false;
 let over = false;
 let spawningEnabled = true;
 
-let shootCooldown = 3500;
+let shootCooldown = 3750;
 let bulletSpeed = 0.3;
 let burst = 1;
 let burstLeft = 1;
@@ -395,11 +395,11 @@ let knockback = 0;
 
 /* ================= UPGRADES ================= */
 const upgrades = [
-  { name:"Fire Rate", vals:[3000,2000,1200,600,350], costs:[250,1000,5000,15000,50000], lvl:0, apply:v=>shootCooldown=v },
-  { name:"Bullet Speed", vals:[0.4,0.7,1.2,1.8], costs:[100,600,3000,10000], lvl:0, apply:v=>bulletSpeed=v },
-  { name:"Burst Ammo", vals:[2,3,4,6], costs:[800,4000,15000,60000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; } },
+  { name:"Fire Rate", vals:[3250,2500,1800,1000,650,250], costs:[200,500,1000,7500,10000,50000], lvl:0, apply:v=>shootCooldown=v },
+  { name:"Bullet Speed", vals:[0.4,0.7,1.2,1.8,2.5], costs:[200,600,3000,10000,50000], lvl:0, apply:v=>bulletSpeed=v },
+  { name:"Burst Ammo", vals:[2,3,4,5], costs:[800,4000,15000,60000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; } },
   { name:"Coin Gain", vals:[1.5,2,3,5], costs:[500,3000,10000,50000], lvl:0, apply:v=>coinMult=v },
-  { name:"Knockback", vals:[0.2,0.5,0.8], costs:[1200,6000,25000], lvl:0, apply:v=>knockback=v }
+  { name:"Knockback", vals:[0.2,0.5,0.8,1.2], costs:[1200,6000,25000,750000], lvl:0, apply:v=>knockback=v }
 ];
 
 /* ================= BOARD SETUP ================= */
@@ -431,7 +431,7 @@ function resetGame(){
   zombies = [];
   enemyBullets = [];
   kills = 0;
-  coins = 100;
+  coins = 0;
   wave = 1;
   waveTimer = 0;
   spawnDelay = 4000;
@@ -548,7 +548,7 @@ function update(){
     wave++;
     waveTimer = 0;
     spawnDelay = Math.max(800, spawnDelay-400);
-    if(wave % 3 === 0) spawnMiniBoss();
+    if(wave % 5 === 0) spawnMiniBoss();
   }
 
   zombies.forEach(z=>{
