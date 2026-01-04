@@ -365,6 +365,12 @@ const TILE = 56;
 const LOOP = 50;
 const WAVE_DURATION = 20000;
 
+/* ================= AUDIO SETUP ================= */
+// These will look for the files in the same folder as your HTML
+const upgradeSfx = new Audio('upgrade.wav');
+const gunshotSfx = new Audio('gunshot.wav');
+const hitSfx = new Audio('shoot.wav'); // Per your request for hitting zombies
+
 /* ================= GAME STATE ================= */
 let turretCol = 2;
 let bullets = [];
@@ -459,6 +465,10 @@ function move(dir){
 function shoot(){
   if(!running || coolingDown || burstLeft<=0) return;
 
+  // PLAY GUNSHOT
+  gunshotSfx.currentTime = 0; 
+  gunshotSfx.play();
+
   bullets.push({
     col: turretCol,
     y: ROWS-1,
@@ -479,8 +489,8 @@ function shoot(){
 
   drawCooldown();
 }
+
 function getBossShootPattern() {
-  // true = 1,3,5 | false = 2,4
   return Math.random() < 0.5 ? [0, 2, 4] : [1, 3];
 }
   
@@ -522,7 +532,7 @@ function spawnMiniBoss(){
     cols: [1, 2, 3],
     drop: [1000, 1500],
     shootTimer: 0,
-    shootPattern: getBossShootPattern(), // 👈 NEW
+    shootPattern: getBossShootPattern(),
     isHit: false
   });
 
@@ -553,27 +563,16 @@ function update(){
 
   zombies.forEach(z=>{
     z.y += z.speed;
-
     if (z.type === "miniboss") {
-  z.shootTimer += LOOP;
-
-  if (z.shootTimer > 2500) {
-    z.shootTimer = 0;
-
-    // fire current pattern
-    z.shootPattern.forEach(col => {
-      enemyBullets.push({
-        col,
-        y: z.y + 1
-      });
-    });
-
-    // pick next pattern randomly
-    z.shootPattern = getBossShootPattern();
-  }
-}
-
-
+      z.shootTimer += LOOP;
+      if (z.shootTimer > 2500) {
+        z.shootTimer = 0;
+        z.shootPattern.forEach(col => {
+          enemyBullets.push({ col, y: z.y + 1 });
+        });
+        z.shootPattern = getBossShootPattern();
+      }
+    }
     if(z.y >= ROWS-2) endGame();
   });
 
@@ -597,25 +596,24 @@ function update(){
       const hitCol = z.cols ? z.cols.includes(b.col) : b.col===z.col;
 
       if(hitCol && b.y<=z.y+0.6 && b.prevY>=z.y){
+        // PLAY HIT SOUND
+        hitSfx.currentTime = 0;
+        hitSfx.play();
+
         z.hp--;
         z.isHit = true;
         z.y = Math.max(-1, z.y-knockback);
         bullets.splice(i,1);
 
         if(z.type==="miniboss"){
-          document.getElementById("bossBarFill").style.width =
-            (z.hp/z.maxHp*100)+"%";
+          document.getElementById("bossBarFill").style.width = (z.hp/z.maxHp*100)+"%";
         }
 
         if(z.hp<=0){
-          coins += Math.floor(
-            (Math.random()*(z.drop[1]-z.drop[0])+z.drop[0]) * coinMult
-          );
-
+          coins += Math.floor((Math.random()*(z.drop[1]-z.drop[0])+z.drop[0]) * coinMult);
           if(z.type==="miniboss"){
             document.getElementById("bossBarContainer").style.display="none";
           }
-
           zombies.splice(j,1);
           kills++;
         }
@@ -702,8 +700,7 @@ function endGame(){
   spawningEnabled=false;
   clearTimeout(spawnTimeout);
   document.getElementById("gameOver").style.display="flex";
-  document.getElementById("finalScore").textContent =
-    `Kills: ${kills} | Wave: ${wave}`;
+  document.getElementById("finalScore").textContent = `Kills: ${kills} | Wave: ${wave}`;
 }
 
 function openUpgrades(){
@@ -741,6 +738,10 @@ function refreshUpgrades(){
     btn.textContent = isMax?"MAX":cost;
     btn.disabled = isMax || coins<cost;
     btn.onclick = ()=>{
+      // PLAY UPGRADE SOUND
+      upgradeSfx.currentTime = 0;
+      upgradeSfx.play();
+
       coins-=cost;
       u.apply(u.vals[u.lvl]);
       u.lvl++;
@@ -759,6 +760,7 @@ setInterval(()=>{
     draw();
   }
 }, LOOP);
+</script>
 </script>
 
 
