@@ -259,7 +259,68 @@ button:active { transform:scale(.95); }
   border:1px solid #333;
   animation:scaleIn .3s ease;
 }
+/* ================= IMPROVED SHOP UI ================= */
+#upgradeList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
 
+.upgradeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #252528;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #333;
+}
+
+.upgrade-info {
+  flex-grow: 1;
+}
+
+.upgrade-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.lvl-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pip {
+  width: 8px;
+  height: 4px;
+  background: #444;
+  border-radius: 2px;
+}
+
+.pip.filled {
+  background: var(--gold);
+  box-shadow: 0 0 5px var(--gold);
+}
+
+.buy-btn {
+  min-width: 80px;
+  height: 35px !important;
+  font-size: 14px !important;
+  margin-left: 10px;
+  background: #2e7d32 !important; /* Green for buying */
+  border: none !important;
+}
+
+.buy-btn:disabled {
+  background: #333 !important;
+  color: #777 !important;
+  cursor: not-allowed;
+}
+  
 /* ================= ANIMATIONS ================= */
 @keyframes recoil { 50%{transform:scale(.9)} }
 @keyframes bulletPulse { to{transform:scale(1.25)} }
@@ -522,11 +583,26 @@ function spawnZombie(){
   spawnTimeout = setTimeout(spawnZombie, spawnDelay);
 }
 
-function spawnMiniBoss(){
+
+
+/* ================= UPDATE LOOP ================= */
+function update(){
+  if(coolingDown){
+    const elapsed = Date.now() - cooldownStart;
+    const per = shootCooldown / burst;
+    burstLeft = Math.floor(elapsed / per);
+    if(burstLeft >= burst){
+   function spawnMiniBoss() {
+  // KILL ALL CURRENT ZOMBIES ON LAWN
+  zombies = []; 
+  
+  // Optional: Add a small visual flair or message here
+  console.log("BOSS WAVE: Lawns Cleared!");
+
   zombies.push({
     type: "miniboss",
-    hp: (wave * 1),
-    maxHp: (wave * 1),
+    hp: (wave * 5), // Increased HP for boss feel
+    maxHp: (wave * 5),
     speed: 0.015,
     y: -1,
     cols: [1, 2, 3],
@@ -537,17 +613,8 @@ function spawnMiniBoss(){
   });
 
   document.getElementById("bossBarContainer").style.display = "block";
-}
-
-
-/* ================= UPDATE LOOP ================= */
-function update(){
-  if(coolingDown){
-    const elapsed = Date.now() - cooldownStart;
-    const per = shootCooldown / burst;
-    burstLeft = Math.floor(elapsed / per);
-    if(burstLeft >= burst){
-      burstLeft = burst;
+  document.getElementById("bossBarFill").style.width = "100%";
+   }   burstLeft = burst;
       coolingDown = false;
     }
     drawCooldown();
@@ -719,40 +786,51 @@ function closeUpgrades(){
 }
 
 /* ================= UPGRADES UI ================= */
-function refreshUpgrades(){
+function refreshUpgrades() {
   const list = document.getElementById("upgradeList");
-  list.innerHTML="";
-  upgrades.forEach(u=>{
-    const row = document.createElement("div");
-    row.className="upgradeRow";
+  list.innerHTML = "";
+
+  upgrades.forEach(u => {
     const cost = u.costs[u.lvl];
-    const isMax = u.lvl>=u.vals.length;
+    const isMax = u.lvl >= u.vals.length;
+    
+    // Create Row Container
+    const row = document.createElement("div");
+    row.className = "upgradeRow";
 
-    row.innerHTML =
-      `<div>
-         <div style="color:var(--gold)">${u.name}</div>
-         <div style="font-size:10px;opacity:.6">LVL ${u.lvl}</div>
-       </div>`;
+    // Create Level Pips
+    let pipsHtml = "";
+    for(let i=0; i < u.vals.length; i++) {
+      pipsHtml += `<div class="pip ${i < u.lvl ? 'filled' : ''}"></div>`;
+    }
 
+    row.innerHTML = `
+      <div class="upgrade-info">
+        <div class="upgrade-name">${u.name}</div>
+        <div class="lvl-pips">${pipsHtml}</div>
+      </div>
+    `;
+
+    // Create Button
     const btn = document.createElement("button");
-    btn.textContent = isMax?"MAX":cost;
-    btn.disabled = isMax || coins<cost;
-    btn.onclick = ()=>{
-      // PLAY UPGRADE SOUND
+    btn.className = "buy-btn";
+    btn.innerHTML = isMax ? "MAXED" : `🪙 ${cost}`;
+    btn.disabled = isMax || coins < cost;
+    
+    btn.onclick = () => {
       upgradeSfx.currentTime = 0;
       upgradeSfx.play();
-
-      coins-=cost;
+      coins -= cost;
       u.apply(u.vals[u.lvl]);
       u.lvl++;
       refreshUpgrades();
+      document.getElementById("coins").textContent = `COINS: ${coins}`;
     };
 
     row.appendChild(btn);
     list.appendChild(row);
   });
 }
-
 /* ================= MAIN LOOP ================= */
 setInterval(()=>{
   if(running && !over){
