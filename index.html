@@ -583,16 +583,7 @@ function spawnZombie(){
   spawnTimeout = setTimeout(spawnZombie, spawnDelay);
 }
 
-
-
-/* ================= UPDATE LOOP ================= */
-function update(){
-  if(coolingDown){
-    const elapsed = Date.now() - cooldownStart;
-    const per = shootCooldown / burst;
-    burstLeft = Math.floor(elapsed / per);
-    if(burstLeft >= burst){
-   function spawnMiniBoss() {
+function spawnMiniBoss() {
   // KILL ALL CURRENT ZOMBIES ON LAWN
   zombies = []; 
   
@@ -619,7 +610,16 @@ function update(){
     }
     drawCooldown();
   }
+  
 
+/* ================= UPDATE LOOP ================= */
+function update(){
+  if(coolingDown){
+    const elapsed = Date.now() - cooldownStart;
+    const per = shootCooldown / burst;
+    burstLeft = Math.floor(elapsed / per);
+    if(burstLeft >= burst){
+   
   waveTimer += LOOP;
   if(waveTimer >= WAVE_DURATION){
     wave++;
