@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Turret vs Zombies: Ultimate Edition</title>
 
 <style>
@@ -41,6 +41,13 @@ body {
   position: relative;
   -webkit-user-select: none;
   user-select: none;
+  min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding: 20px 0;
+  }
 }
 
 body::before {
@@ -74,6 +81,37 @@ body::before {
   overflow: hidden;
   padding-top: 12px;
   margin: 0 auto;
+}
+
+/* Desktop and tablet adjustments */
+@media (min-width: 768px) {
+  #game {
+    max-width: 420px;
+  }
+}
+
+/* Landscape mode on mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  #game {
+    max-width: 35vh;
+    padding: 4px;
+    gap: 3px;
+    padding-top: 6px;
+  }
+  
+  #topBar {
+    padding: 6px !important;
+  }
+  
+  #stats {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+  }
+  
+  #controls button {
+    height: 36px !important;
+    font-size: 12px !important;
+  }
 }
 
 /* ================= FLOATING PARTICLES ================= */
@@ -214,6 +252,18 @@ body::before {
   justify-content: center;
 }
 
+@media (min-width: 768px) {
+  #boardWrapper {
+    max-height: calc(100vh - 220px);
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  #boardWrapper {
+    max-height: calc(100vh - 140px);
+  }
+}
+
 #board {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -231,6 +281,20 @@ body::before {
   position: relative;
   gap: 0;
   margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  #board {
+    width: 80%;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  #board {
+    width: 75%;
+    border-radius: 8px;
+    border-width: 2px;
+  }
 }
 
 #board::before {
@@ -301,6 +365,18 @@ body::before {
   width: 85%;
   height: 100%;
   pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  #entities {
+    width: 80%;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  #entities {
+    width: 75%;
+  }
 }
 
 .entity {
@@ -1303,8 +1379,8 @@ function spawnMiniBoss() {
   zombies = [];
   zombies.push({
     type: "miniboss",
-    hp: wave * 6 / 5,
-    maxHp: wave * 6 / 5,
+    hp: wave * 2,
+    maxHp: wave * 2,
     speed: 0.015,
     y: -1,
     cols: [1, 2, 3],
