@@ -1,358 +1,992 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Turret vs Zombies: Definitive Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Turret vs Zombies: Ultimate Edition</title>
 
 <style>
 /* ================= ROOT ================= */
 :root {
-  --gold:#ffd700;
-  --bg:#0a0a0c;
-  --cell:#1a2e1a;
-  --danger:#2e1a1a;
+  --gold: #ffd700;
+  --bg: #0a0a0c;
+  --cell: #1a2e1a;
+  --danger: #2e1a1a;
+  --neon-blue: #00ffff;
+  --neon-green: #39ff14;
+  --neon-red: #ff073a;
+  --purple: #8a2be2;
 }
 
 /* ================= BASE ================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 body {
-  margin:0;
-  background:radial-gradient(circle at center,#1b1b25,#050505);
-  font-family:'Segoe UI',system-ui,sans-serif;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  overflow:hidden;
+  background: radial-gradient(circle at 30% 20%, #1b1b25 0%, #050505 50%, #0a0a0c 100%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: backgroundShift 20s ease-in-out infinite alternate;
 }
 
 #game {
-  width:420px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  position:relative;
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  z-index: 1;
+  padding: 8px;
+  gap: 6px;
+  overflow: hidden;
+  padding-top: 12px;
+  margin: 0 auto;
+}
+
+/* ================= FLOATING PARTICLES ================= */
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 215, 0, 0.6);
+  border-radius: 50%;
+  animation: float 15s linear infinite;
 }
 
 /* ================= TOP BAR ================= */
 #topBar {
-  width:100%;
-  padding:12px;
-  background:rgba(0,0,0,.6);
-  border-radius:12px;
-  margin-bottom:10px;
-  border:1px solid #333;
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(8px, 2vw, 12px);
+  background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,30,0.9));
+  border-radius: 12px;
+  border: 2px solid #333;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+  position: relative;
 }
 
 #stats {
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr auto;
-  gap:10px;
-  font-weight:bold;
-  font-size:14px;
-  color:var(--gold);
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: clamp(4px, 1vw, 8px);
+  font-weight: bold;
+  font-size: clamp(10px, 2.2vw, 12px);
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+#healthBar {
+  background: #333;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #555;
+}
+
+#healthFill {
+  height: 100%;
+  background: linear-gradient(to right, #ff0000, #ff6600, #ffaa00);
+  width: 100%;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 100, 0, 0.5);
+}
+
+#comboDisplay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: linear-gradient(45deg, var(--neon-blue), var(--purple));
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: clamp(16px, 4vw, 24px);
+  color: white;
+  text-shadow: 0 0 15px rgba(255,255,255,0.9);
+  transition: transform 0.3s ease;
+  box-shadow: 
+    0 0 30px rgba(0, 255, 255, 0.6),
+    0 10px 40px rgba(0, 0, 0, 0.8);
+  z-index: 100;
+  white-space: nowrap;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+#comboDisplay.show {
+  animation: comboPulse 0.5s ease;
 }
 
 /* ================= COOLDOWN ================= */
 #cooldownBar {
-  display:grid;
-  grid-auto-flow:column;
-  gap:4px;
-  height:10px;
-  margin-top:10px;
+  display: grid;
+  grid-auto-flow: column;
+  gap: 2px;
+  height: 6px;
+  width: 100%;
 }
 
 .cooldownSeg {
-  background:#222;
-  border-radius:5px;
-  overflow:hidden;
-  border:1px solid #333;
+  background: #222;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #444;
+  position: relative;
+  flex: 1;
+}
+
+.cooldownSeg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  animation: shimmer 2s infinite;
+  pointer-events: none;
 }
 
 .cooldownSegFill {
-  height:100%;
-  width:0%;
-  background:linear-gradient(to right,#ffae00,var(--gold));
-  transition:width .1s linear;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #ff6600, var(--gold), #ffff00);
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
 }
 
 /* ================= BOARD ================= */
-#boardWrapper { position:relative; }
+#boardWrapper { 
+  position: relative;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 #board {
-  display:grid;
-  grid-template-columns:repeat(5,56px);
-  grid-template-rows:repeat(10,56px);
-  background:#111;
-  border-radius:12px;
-  padding:6px;
-  border:4px solid #333;
-  box-shadow:0 20px 50px rgba(0,0,0,.8);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  width: 85%;
+  aspect-ratio: 5 / 10;
+  max-height: 100%;
+  background: linear-gradient(135deg, #111, #1a1a1a);
+  border-radius: 12px;
+  padding: 0;
+  border: 3px solid #333;
+  box-shadow: 
+    0 0 20px rgba(0,0,0,0.8),
+    inset 0 0 15px rgba(0,0,0,0.5);
+  position: relative;
+  gap: 0;
+  margin: 0 auto;
+}
+
+#board::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(0,255,255,0.1) 50%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, rgba(255,215,0,0.1) 50%, transparent 100%);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: boardGlow 4s ease-in-out infinite alternate;
 }
 
 .cell {
-  background:var(--cell);
-  box-shadow:inset 0 0 15px rgba(0,0,0,.5);
+  background: var(--cell);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  overflow: visible;
+}
+
+.cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+  animation: cellShimmer 3s infinite;
+  animation-delay: calc(var(--cell-index) * 0.1s);
+  pointer-events: none;
 }
 
 .danger {
-  background:var(--danger);
-  position:relative;
-  animation:dangerPulse 1.5s infinite;
+  background: var(--danger);
+  position: relative;
+  animation: dangerPulse 1.5s infinite;
+  box-shadow: 
+    inset 0 0 10px rgba(255,0,0,0.3),
+    0 0 15px rgba(255,0,0,0.2);
 }
 
 .danger::after {
-  content:"";
-  position:absolute;
-  left:0; right:0; top:50%;
-  height:3px;
-  background:#ff4444;
-  box-shadow:0 0 10px red;
-  transform:translateY(-50%);
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, #ff4444, transparent);
+  box-shadow: 0 0 12px red;
+  transform: translateY(-50%);
+  animation: dangerLine 2s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
 /* ================= ENTITIES ================= */
 #entities {
-  position:absolute;
-  inset:6px;
-  pointer-events:none;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .entity {
-  position:absolute;
-  width:56px;
-  height:56px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position: absolute;
+  width: 20%;
+  height: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
 }
 
 /* ================= TURRET ================= */
 .turret {
-  width:40px;
-  height:40px;
-  background:linear-gradient(135deg,#333,#111);
-  border-radius:50%;
-  border:2px solid #444;
-  position:relative;
+  width: 70%;
+  height: 70%;
+  background: linear-gradient(135deg, #444, #111, #333);
+  border-radius: 50%;
+  border: 2px solid #666;
+  position: relative;
+  box-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.3),
+    inset 0 0 8px rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.turret.fire { animation:recoil .12s; }
+.turret::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, var(--gold), #cc9900);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+}
+
+.turret.fire { 
+  animation: recoil 0.15s ease-out;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.8),
+    inset 0 0 12px rgba(255, 255, 255, 0.2);
+}
 
 .nozzle {
-  position:absolute;
-  width:12px;
-  height:20px;
-  background:#222;
-  top:-15px;
-  left:50%;
-  transform:translateX(-50%);
-  border-radius:3px;
-  border:1px solid #444;
+  position: absolute;
+  width: 20%;
+  height: 40%;
+  background: linear-gradient(to bottom, #333, #111);
+  top: -45%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  border: 1px solid #555;
+  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+
+.nozzle::after {
+  content: '';
+  position: absolute;
+  top: -8%;
+  left: 50%;
+  width: 30%;
+  height: 30%;
+  background: #ff6600;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(255, 100, 0, 0.8);
+  opacity: 0;
+}
+
+.turret.fire .nozzle::after {
+  opacity: 1;
+  animation: muzzleFlash 0.2s ease-out;
 }
 
 /* ================= BULLETS ================= */
 .bullet {
-  width:14px;
-  height:14px;
-  background:white;
-  border-radius:50%;
-  box-shadow:0 0 10px white,0 0 20px var(--gold);
-  animation:bulletPulse .4s infinite alternate;
+  width: 35%;
+  height: 35%;
+  background: radial-gradient(circle, white, var(--gold));
+  border-radius: 50%;
+  box-shadow: 
+    0 0 12px white,
+    0 0 20px var(--gold),
+    0 0 30px rgba(255, 215, 0, 0.5);
+  animation: bulletPulse 0.3s infinite alternate;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bullet::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px rgba(255,255,255,0.8);
 }
 
 .enemyBullet {
-  background:#f00;
-  box-shadow:0 0 10px red;
+  background: radial-gradient(circle, #ff073a, #cc0000);
+  box-shadow: 
+    0 0 12px #ff073a,
+    0 0 20px rgba(255, 7, 58, 0.5);
+}
+
+.enemyBullet::before {
+  background: #ff073a;
+  box-shadow: 0 0 8px rgba(255, 7, 58, 0.8);
 }
 
 /* ================= ZOMBIES ================= */
 .zombiebody {
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:2px solid rgba(0,0,0,.5);
-  animation:zombieWalk .6s infinite alternate;
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(0,0,0,0.5);
+  animation: zombieWalk 0.8s infinite alternate;
+  position: relative;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+}
+
+.zombiebody.paused {
+  animation-play-state: paused;
+}
+
+.zombiebody::before {
+  content: '';
+  position: absolute;
+  top: -12%;
+  left: 50%;
+  width: 12%;
+  height: 12%;
+  background: #ff0000;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px #ff0000;
+  animation: zombieEyes 1.5s infinite;
+}
+
+.zombiebody.paused::before {
+  animation-play-state: paused;
 }
 
 .zombie {
-  width:22px;
-  height:22px;
-  border-radius:50%;
+  width: 55%;
+  height: 55%;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
 }
 
-.basic { background:#4ecdc4; }
-.fast { background:#ff0054; }
-.armored { background:#f77f00; border:2px solid white; }
-.heavy { background:#444; border:2px solid #aaa; }
+.basic { 
+  background: linear-gradient(135deg, #4ecdc4, #26a69a);
+  box-shadow: 0 0 12px rgba(78, 205, 196, 0.5);
+}
 
-.hit { animation:hitFlash .15s; }
-.dead { animation:death .3s forwards; }
+.fast { 
+  background: linear-gradient(135deg, #ff0054, #cc0044);
+  box-shadow: 0 0 12px rgba(255, 0, 84, 0.5);
+  animation: fastZombieGlow 0.5s infinite alternate;
+}
+
+.fast.paused {
+  animation-play-state: paused;
+}
+
+.armored { 
+  background: linear-gradient(135deg, #f77f00, #cc6600);
+  border: 3px solid #ffaa00;
+  box-shadow: 0 0 12px rgba(247, 127, 0, 0.5);
+}
+
+.heavy { 
+  background: linear-gradient(135deg, #444, #222);
+  border: 3px solid #888;
+  box-shadow: 0 0 12px rgba(136, 136, 136, 0.5);
+}
+
+.hit { 
+  animation: hitFlash 0.2s ease-out;
+  transform: scale(1.1);
+}
+
+.dead { 
+  animation: death 0.4s forwards ease-out;
+}
 
 /* ================= BOSS BAR ================= */
 #bossBarContainer {
-  display:none;
-  width:100%;
-  height:8px;
-  background:#200;
-  border-radius:4px;
-  margin-bottom:10px;
-  overflow:hidden;
-  border:1px solid #500;
+  display: none;
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(135deg, #200, #400);
+  border-radius: 5px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  border: 2px solid #600;
+  box-shadow: 
+    0 0 15px rgba(255,0,0,0.3),
+    inset 0 0 8px rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
+}
+
+#bossBarContainer::before {
+  content: 'BOSS';
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  font-size: 7px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 5px rgba(255,255,255,0.8);
+  z-index: 2;
+  pointer-events: none;
 }
 
 #bossBarFill {
-  width:100%;
-  height:100%;
-  background:linear-gradient(to right,#ff0000,#900);
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #ff0000, #ff6600, #ffaa00);
+  box-shadow: 0 0 10px rgba(255,0,0,0.5);
+  animation: bossBarPulse 1s infinite alternate;
+  transition: width 0.2s ease;
+}
+
+#bossBarFill.paused {
+  animation-play-state: paused;
 }
 
 /* ================= CONTROLS ================= */
 #controls {
-  margin-top:15px;
-  display:flex;
-  gap:10px;
-  width:100%;
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: clamp(5px, 1.2vw, 8px);
+  width: 100%;
+  flex-shrink: 0;
+  padding: 0 2px;
 }
 
 button {
-  background:#222;
-  color:white;
-  border:1px solid #444;
-  border-radius:12px;
-  cursor:pointer;
-  transition:.2s;
-  font-weight:bold;
+  background: linear-gradient(135deg, #333, #111);
+  color: white;
+  border: 2px solid #555;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(255,255,255,0.5);
+  box-shadow: 
+    0 2px 8px rgba(0,0,0,0.3),
+    inset 0 0 6px rgba(255,255,255,0.1);
+  padding: 0;
+  font-size: clamp(11px, 2.8vw, 16px);
+  height: clamp(38px, 8.5vw, 50px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
-button:hover { filter:brightness(1.2); }
-button:active { transform:scale(.95); }
+button:hover:not(:disabled) { 
+  filter: brightness(1.3);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0,0,0,0.4),
+    inset 0 0 10px rgba(255,255,255,0.2);
+}
 
-#controls button {
-  height:55px;
-  font-size:24px;
-  flex:1;
+button:active:not(:disabled) { 
+  transform: translateY(0) scale(0.95);
+}
+
+#controls button:nth-child(2) {
+  background: linear-gradient(135deg, var(--gold), #cc9900);
+  color: black;
+  font-size: clamp(11px, 2.8vw, 14px);
+  box-shadow: 
+    0 2px 8px rgba(255, 215, 0, 0.3),
+    inset 0 0 6px rgba(255,255,255,0.2);
+}
+
+#shopBtn {
+  width: clamp(28px, 7vw, 36px) !important;
+  height: clamp(28px, 7vw, 33px) !important;
+  padding: 0 !important;
+  font-size: clamp(11px, 2.8vw, 15px) !important;
+  border-radius: 6px !important;
+  background: linear-gradient(135deg,var(--gold),#cc9900) !important;
+  color: black !important;
 }
 
 /* ================= OVERLAYS ================= */
 .overlay {
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.9);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:100;
-  backdrop-filter:blur(5px);
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  backdrop-filter: blur(10px);
 }
 
 .panel {
-  background:#1a1a1c;
-  padding:25px;
-  border-radius:20px;
-  width:320px;
-  border:1px solid #333;
-  animation:scaleIn .3s ease;
+  background: linear-gradient(135deg, #1a1a1c, #2a2a2c);
+  padding: clamp(15px, 4vw, 25px);
+  border-radius: 20px;
+  width: min(90vw, 340px);
+  border: 2px solid #444;
+  box-shadow: 
+    0 15px 50px rgba(0,0,0,0.8),
+    inset 0 0 15px rgba(255,255,255,0.1);
+  animation: scaleIn 0.4s ease;
+  max-height: 85vh;
+  overflow-y: auto;
 }
+
+.panel h1 {
+  color: var(--gold);
+  margin: 0 0 12px 0;
+  font-size: clamp(18px, 4vw, 26px);
+  text-shadow: 0 0 20px rgba(255,215,0,0.8);
+}
+
+.panel h2 {
+  color: #ff4444;
+  margin-top: 0;
+  font-size: clamp(16px, 3.5vw, 22px);
+}
+
+.panel h3 {
+  margin-top: 0;
+  color: var(--gold);
+  font-size: clamp(15px, 3.5vw, 20px);
+  text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+.panel p {
+  opacity: 0.8;
+  font-size: clamp(12px, 2.5vw, 15px);
+  margin: 8px 0;
+}
+
 /* ================= IMPROVED SHOP UI ================= */
 #upgradeList {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 400px;
+  max-height: 350px;
   overflow-y: auto;
-  padding-right: 5px;
+  padding-right: 6px;
+}
+
+#upgradeList::-webkit-scrollbar {
+  width: 5px;
+}
+
+#upgradeList::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+#upgradeList::-webkit-scrollbar-thumb {
+  background: rgba(255,215,0,0.5);
+  border-radius: 3px;
+}
+
+#upgradeList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,215,0,0.8);
 }
 
 .upgradeRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #252528;
-  padding: 12px;
+  background: linear-gradient(135deg, #252528, #353538);
+  padding: clamp(10px, 2vw, 13px);
   border-radius: 10px;
-  border: 1px solid #333;
+  border: 2px solid #444;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 3px 12px rgba(0,0,0,0.3),
+    inset 0 0 8px rgba(255,255,255,0.05);
+  gap: 10px;
+}
+
+.upgradeRow:hover {
+  border-color: var(--gold);
+  box-shadow: 
+    0 5px 16px rgba(0,0,0,0.4),
+    0 0 15px rgba(255, 215, 0, 0.2);
 }
 
 .upgrade-info {
   flex-grow: 1;
+  min-width: 0;
 }
 
 .upgrade-name {
   font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: clamp(12px, 2.5vw, 15px);
+  margin-bottom: 5px;
+  color: var(--gold);
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lvl-pips {
   display: flex;
   gap: 3px;
+  flex-wrap: wrap;
 }
 
 .pip {
   width: 8px;
-  height: 4px;
+  height: 5px;
   background: #444;
   border-radius: 2px;
+  border: 1px solid #666;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .pip.filled {
-  background: var(--gold);
-  box-shadow: 0 0 5px var(--gold);
+  background: linear-gradient(to right, var(--gold), #ffff00);
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+  border-color: var(--gold);
 }
 
 .buy-btn {
-  min-width: 80px;
-  height: 35px !important;
-  font-size: 14px !important;
-  margin-left: 10px;
-  background: #2e7d32 !important; /* Green for buying */
-  border: none !important;
+  min-width: 70px !important;
+  height: 36px !important;
+  font-size: clamp(11px, 2vw, 13px) !important;
+  padding: 0 !important;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20) !important;
+  border: 2px solid #4caf50 !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  text-shadow: 0 0 5px rgba(255,255,255,0.5) !important;
+}
+
+.buy-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #388e3c, #2e7d32) !important;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.buy-btn:active:not(:disabled) {
+  transform: translateY(0) !important;
 }
 
 .buy-btn:disabled {
-  background: #333 !important;
+  background: linear-gradient(135deg, #333, #222) !important;
   color: #777 !important;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
+  border-color: #555 !important;
+  opacity: 0.6 !important;
 }
-  
+
+/* ================= PARTICLE EFFECTS ================= */
+.explosion {
+  position: absolute;
+  width: 20%;
+  height: 10%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.explosion-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: explode 0.6s ease-out forwards;
+}
+
+.damage-text {
+  position: absolute;
+  font-weight: bold;
+  font-size: clamp(11px, 2.2vw, 15px);
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+  pointer-events: none;
+  z-index: 15;
+  animation: damageFloat 1s ease-out forwards;
+  white-space: nowrap;
+}
+
+/* ================= SCREEN SHAKE ================= */
+.shake {
+  animation: screenShake 0.3s ease-in-out;
+}
+
 /* ================= ANIMATIONS ================= */
-@keyframes recoil { 50%{transform:scale(.9)} }
-@keyframes bulletPulse { to{transform:scale(1.25)} }
-@keyframes zombieWalk { to{transform:translateY(3px)} }
-@keyframes hitFlash { from{filter:brightness(4)}to{filter:brightness(1)} }
-@keyframes death { to{opacity:0;transform:scale(.3)} }
-@keyframes dangerPulse { 50%{filter:brightness(1.4)} }
-@keyframes scaleIn { from{transform:scale(.7);opacity:0} }
+@keyframes backgroundShift {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% {
+    transform: translateY(-10vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes comboPulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.3); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes boardGlow {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes cellShimmer {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes dangerLine {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes dangerPulse { 
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.6) saturate(1.5); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes recoil { 
+  0% { transform: scale(1); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+@keyframes muzzleFlash {
+  0% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(2); }
+}
+
+@keyframes bulletPulse { 
+  0% { transform: scale(1); }
+  100% { transform: scale(1.3); }
+}
+
+@keyframes zombieWalk { 
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+@keyframes zombieEyes {
+  0%, 80% { opacity: 1; }
+  90% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fastZombieGlow {
+  0% { box-shadow: 0 0 12px rgba(255, 0, 84, 0.5); }
+  100% { box-shadow: 0 0 20px rgba(255, 0, 84, 0.8); }
+}
+
+@keyframes hitFlash { 
+  0% { filter: brightness(1); }
+  50% { filter: brightness(4) saturate(2); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes death { 
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0.2) rotate(180deg); }
+}
+
+@keyframes bossBarPulse {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.3); }
+}
+
+@keyframes scaleIn { 
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes explode {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes damageFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
 </style>
 </head>
 
 <body>
 
+<!-- ================= FLOATING PARTICLES ================= -->
+<div id="particles"></div>
+
 <!-- ================= START SCREEN ================= -->
 <div id="startScreen" class="overlay" style="display:flex;">
   <div class="panel" style="text-align:center;">
-    <button class="info-toggle" onclick="toggleInfo()">i</button>
-    <h1 style="color:var(--gold);margin:0 0 10px;">TURRET DEFENSE</h1>
-    <p style="opacity:.7;">Protect the perimeter.</p>
+    <button class="info-toggle" onclick="toggleInfo()" style="position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;padding:0;font-size:16px;">?</button>
+    <h1>⚡ TURRET DEFENSE ⚡</h1>
+    <p>Ultimate Edition - Protect the perimeter at all costs.</p>
 
     <button onclick="startGame()"
-      style="width:100%;height:60px;background:var(--gold);color:black;font-size:20px;">
-      START GAME
+      style="width:100%;height:60px;background:linear-gradient(135deg,var(--gold),#ffaa00);color:black;font-size:18px;font-weight:bold;margin-top:12px;">
+      ⚡ START GAME ⚡
     </button>
 
-    <div id="infoBox" style="display:none;margin-top:15px;">
-      <strong>HOW TO PLAY:</strong><br>
-      • ◀ ▶ Move turret<br>
-      • FIRE shoots bullets<br>
-      • ⟳ reloads burst ammo<br>
-      • Don’t let zombies reach the red line<br>
-      • 🛒 upgrades your turret
+    <div id="infoBox" style="display:none;margin-top:15px;text-align:left;background:rgba(0,0,0,0.5);padding:12px;border-radius:8px;font-size:12px;line-height:1.6;">
+      <strong style="color:var(--gold);font-size:13px;">HOW TO PLAY:</strong><br><br>
+      <strong>🎮 CONTROLS:</strong><br>
+      • <strong>◀ ▶</strong> or <strong>A/D</strong> - Move turret<br>
+      • <strong>FIRE</strong> or <strong>SPACE</strong> - Shoot<br>
+      • <strong>⟳</strong> or <strong>R</strong> - Reload ammo<br>
+      • <strong>🛒</strong> - Open shop<br><br>
+      
+      <strong>🎯 OBJECTIVE:</strong><br>
+      • Don't let zombies reach the red danger line<br>
+      • Survive waves and defeat the boss<br>
+      • Earn coins from kills<br>
+      • Build combos for bonus coins!<br><br>
+      
+      <strong>🛡️ TIPS:</strong><br>
+      • Upgrade fire rate for rapid shots<br>
+      • Increase bullet speed for better accuracy<br>
+      • Burst ammo adds magazine size<br>
+      • Boss appears every 5 waves
     </div>
   </div>
 </div>
@@ -368,6 +1002,9 @@ button:active { transform:scale(.95); }
       <div id="coins">COINS: 100</div>
       <button id="shopBtn" onclick="openUpgrades()">🛒</button>
     </div>
+    <div id="healthBar">
+      <div id="healthFill"></div>
+    </div>
     <div id="cooldownBar"></div>
   </div>
 
@@ -378,17 +1015,18 @@ button:active { transform:scale(.95); }
 
   <!-- BOARD -->
   <div id="boardWrapper">
+    <div id="comboDisplay">COMBO x0</div>
     <div id="board"></div>
     <div id="entities"></div>
 
     <!-- GAME OVER -->
     <div id="gameOver" class="overlay">
       <div class="panel" style="text-align:center;">
-        <h2 style="color:#ff4444;margin-top:0;">GAME OVER</h2>
-        <p id="finalScore"></p>
+        <h2>GAME OVER</h2>
+        <p id="finalScore" style="font-size:16px;margin:20px 0;line-height:1.8;"></p>
         <button onclick="resetGame()"
-          style="width:100%;height:50px;background:white;color:black;">
-          TRY AGAIN
+          style="width:100%;height:60px;background:linear-gradient(135deg,white,#f0f0f0);color:black;font-size:18px;margin-top:15px;">
+          🔄 TRY AGAIN
         </button>
       </div>
     </div>
@@ -397,10 +1035,7 @@ button:active { transform:scale(.95); }
   <!-- CONTROLS -->
   <div id="controls">
     <button onclick="move(-1)">◀</button>
-    <button onclick="shoot()"
-      style="background:var(--gold);color:black;flex:2;">
-      FIRE
-    </button>
+    <button onclick="shoot()">⚡ FIRE ⚡</button>
     <button onclick="move(1)">▶</button>
     <button onclick="reload()">⟳</button>
   </div>
@@ -409,11 +1044,12 @@ button:active { transform:scale(.95); }
 <!-- ================= UPGRADES ================= -->
 <div id="upgradeOverlay" class="overlay">
   <div class="panel">
-    <h3 style="margin-top:0;color:var(--gold);">SHOP / UPGRADES</h3>
+    <h3>🛒 WEAPON SHOP</h3>
+    <p style="font-size:12px;opacity:0.7;margin:0 0 15px 0;">Buy upgrades to increase your power</p>
     <div id="upgradeList"></div>
     <button onclick="closeUpgrades()"
-      style="width:100%;margin-top:15px;height:40px;">
-      BACK TO GAME
+      style="width:100%;margin-top:20px;height:50px;background:linear-gradient(135deg,#666,#444);font-size:16px;padding:0;">
+      ← BACK TO BATTLE
     </button>
   </div>
 </div>
@@ -422,15 +1058,31 @@ button:active { transform:scale(.95); }
 /* ================= GAME CONSTANTS ================= */
 const COLS = 5;
 const ROWS = 10;
-const TILE = 56;
 const LOOP = 50;
-const WAVE_DURATION = 20000;
+const WAVE_DURATION = 25000;
 
 /* ================= AUDIO SETUP ================= */
-// These will look for the files in the same folder as your HTML
-const upgradeSfx = new Audio('Upgrade.wav');
-const gunshotSfx = new Audio('GunShot.wav');
-const hitSfx = new Audio('Shoot.wav'); // Per your request for hitting zombies
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(frequency, duration, volume = 0.3) {
+  try {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc.frequency.value = frequency;
+    gain.gain.setValueAtTime(volume, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    osc.start(audioContext.currentTime);
+    osc.stop(audioContext.currentTime + duration);
+  } catch(e) {}
+}
+
+const playGunshot = () => playTone(440, 0.1, 0.3);
+const playHit = () => playTone(880, 0.15, 0.2);
+const playUpgrade = () => playTone(1046, 0.2, 0.25);
 
 /* ================= GAME STATE ================= */
 let turretCol = 2;
@@ -441,10 +1093,14 @@ let enemyBullets = [];
 let kills = 0;
 let coins = 100;
 let wave = 1;
+let health = 100;
+let combo = 0;
+let comboTimer = 0;
 
 let running = false;
 let over = false;
 let spawningEnabled = true;
+let paused = false;
 
 let shootCooldown = 3750;
 let bulletSpeed = 0.3;
@@ -452,9 +1108,10 @@ let burst = 1;
 let burstLeft = 1;
 let coolingDown = false;
 let cooldownStart = 0;
+let cooldownElapsedBeforePause = 0;
 
 let spawnDelay = 4500;
-let spawnTimeout = null;
+let nextSpawnTime = 0;
 let waveTimer = 0;
 
 let coinMult = 1;
@@ -465,43 +1122,120 @@ const upgrades = [
   { name:"Fire Rate", vals:[3250,2500,1800,1000,650,250], costs:[200,500,1000,7500,10000,50000], lvl:0, apply:v=>shootCooldown=v },
   { name:"Bullet Speed", vals:[0.4,0.7,1.2,1.8,2.5], costs:[200,600,3000,10000,50000], lvl:0, apply:v=>bulletSpeed=v },
   { name:"Burst Ammo", vals:[2,3,4,5], costs:[800,4000,15000,60000], lvl:0, apply:v=>{ burst=v; burstLeft=v; coolingDown=false; } },
-  { name:"Coin Gain", vals:[1.5,2,3,5,7], costs:[500,2500,7500,15000,60000], lvl:0, apply:v=>coinMult=v },
-  { name:"Knockback", vals:[0.2,0.5,0.8,1.2], costs:[1200,6000,25000,750000], lvl:0, apply:v=>knockback=v }
+  { name:"Coin Multiplier", vals:[1.5,2,3,5,7], costs:[500,2500,7500,15000,60000], lvl:0, apply:v=>coinMult=v },
+  { name:"Knockback Power", vals:[0.2,0.5,0.8,1.2], costs:[1200,6000,25000,750000], lvl:0, apply:v=>knockback=v }
 ];
 
-/* ================= BOARD SETUP ================= */
-const board = document.getElementById("board");
-for(let r=0;r<ROWS;r++){
-  for(let c=0;c<COLS;c++){
-    const cell = document.createElement("div");
-    cell.className = "cell" + (r===ROWS-2?" danger":"");
-    board.appendChild(cell);
+/* ================= INITIALIZATION ================= */
+function initGame() {
+  createBoard();
+  createParticles();
+}
+
+function createBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = '';
+  for(let r = 0; r < ROWS; r++) {
+    for(let c = 0; c < COLS; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell" + (r === ROWS-2 ? " danger" : "");
+      cell.style.setProperty('--cell-index', r * COLS + c);
+      board.appendChild(cell);
+    }
+  }
+}
+
+function createParticles() {
+  const container = document.getElementById("particles");
+  container.innerHTML = '';
+  for(let i = 0; i < 15; i++) {
+    const particle = document.createElement("div");
+    particle.className = "particle";
+    particle.style.left = Math.random() * 100 + "%";
+    particle.style.animationDelay = Math.random() * 15 + "s";
+    particle.style.animationDuration = (10 + Math.random() * 10) + "s";
+    container.appendChild(particle);
   }
 }
 
 /* ================= UI HELPERS ================= */
-function toggleInfo(){
+function toggleInfo() {
   const box = document.getElementById("infoBox");
-  box.style.display = box.style.display==="block"?"none":"block";
+  box.style.display = box.style.display === "block" ? "none" : "block";
+}
+
+function updateCombo() {
+  comboTimer = 3000;
+  const display = document.getElementById("comboDisplay");
+  display.textContent = `COMBO x${combo}`;
+  display.style.transform = "translate(-50%, -50%) scale(1)";
+  display.classList.remove("show");
+  void display.offsetWidth;
+  display.classList.add("show");
+  
+  setTimeout(() => {
+    display.style.transform = "translate(-50%, -50%) scale(0)";
+  }, 2000);
+}
+
+function createExplosion(x, y) {
+  const explosion = document.createElement("div");
+  explosion.className = "explosion";
+  explosion.style.left = (x * 20) + "%";
+  explosion.style.top = (y * 10) + "%";
+  
+  for(let i = 0; i < 8; i++) {
+    const particle = document.createElement("div");
+    particle.className = "explosion-particle";
+    const angle = (i / 8) * Math.PI * 2;
+    const distance = 30 + Math.random() * 20;
+    particle.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+    particle.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+    explosion.appendChild(particle);
+  }
+  
+  document.getElementById("entities").appendChild(explosion);
+  setTimeout(() => explosion.remove(), 600);
+}
+
+function showDamageText(x, y, damage) {
+  const text = document.createElement("div");
+  text.className = "damage-text";
+  text.textContent = `-${damage}`;
+  text.style.left = (x * 20 + 8) + "%";
+  text.style.top = (y * 10 + 3) + "%";
+  document.getElementById("entities").appendChild(text);
+  setTimeout(() => text.remove(), 1000);
+}
+
+function screenShake() {
+  const wrapper = document.getElementById("boardWrapper");
+  wrapper.classList.remove("shake");
+  void wrapper.offsetWidth;
+  wrapper.classList.add("shake");
 }
 
 /* ================= GAME FLOW ================= */
-function startGame(){
-  document.getElementById("startScreen").style.display="none";
+function startGame() {
+  document.getElementById("startScreen").style.display = "none";
   resetGame();
 }
 
-function resetGame(){
-  clearTimeout(spawnTimeout);
+function resetGame() {
   turretCol = 2;
   bullets = [];
   zombies = [];
   enemyBullets = [];
   kills = 0;
-  coins = 0;
+  coins = 100;
   wave = 1;
+  health = 100;
+  combo = 0;
+  comboTimer = 0;
   waveTimer = 0;
   spawnDelay = 4500;
+  nextSpawnTime = Date.now() + spawnDelay;
+  paused = false;
 
   burstLeft = burst;
   coolingDown = false;
@@ -510,90 +1244,67 @@ function resetGame(){
   running = true;
   spawningEnabled = true;
 
-  document.getElementById("gameOver").style.display="none";
-  document.getElementById("bossBarContainer").style.display="none";
-
-  spawnZombie();
+  document.getElementById("gameOver").style.display = "none";
+  document.getElementById("bossBarContainer").style.display = "none";
+  document.getElementById("healthFill").style.width = "100%";
 }
 
 /* ================= MOVEMENT ================= */
-function move(dir){
-  if(!running) return;
-  turretCol = Math.max(0,Math.min(COLS-1,turretCol+dir));
+function move(dir) {
+  if(!running || paused) return;
+  turretCol = Math.max(0, Math.min(COLS-1, turretCol + dir));
 }
 
 /* ================= SHOOTING ================= */
-function shoot(){
-  if(!running || coolingDown || burstLeft<=0) return;
-
-  // PLAY GUNSHOT
-  gunshotSfx.currentTime = 0; 
-  gunshotSfx.play();
-
-  bullets.push({
-    col: turretCol,
-    y: ROWS-1,
-    prevY: ROWS-1
-  });
-
+function shoot() {
+  if(!running || coolingDown || burstLeft <= 0 || paused) return;
+  playGunshot();
+  bullets.push({ col: turretCol, y: ROWS-1, prevY: ROWS-1 });
   burstLeft--;
-
-  const bw = document.getElementById("boardWrapper");
-  bw.classList.remove("shake");
-  void bw.offsetWidth;
-  bw.classList.add("shake");
-
-  if(burstLeft===0){
+  if(burstLeft === 0) {
     coolingDown = true;
     cooldownStart = Date.now();
+    cooldownElapsedBeforePause = 0;
   }
-
   drawCooldown();
 }
 
 function getBossShootPattern() {
   return Math.random() < 0.5 ? [0, 2, 4] : [1, 3];
 }
-  
-function reload(){
-  if(!running || coolingDown || burstLeft===burst) return;
+
+function reload() {
+  if(!running || coolingDown || burstLeft === burst || paused) return;
   burstLeft = 0;
   coolingDown = true;
   cooldownStart = Date.now();
+  cooldownElapsedBeforePause = 0;
+  playTone(800, 0.1, 0.2);
 }
 
 /* ================= SPAWNING ================= */
-function spawnZombie(){
-  if(over || !running || !spawningEnabled) return;
-
-  const minibossAlive = zombies.some(z=>z.type==="miniboss");
-  if(!minibossAlive){
+function spawnZombie() {
+  if(over || !spawningEnabled) return;
+  const minibossAlive = zombies.some(z => z.type === "miniboss");
+  if(!minibossAlive) {
     let z = { type:"basic", hp:1, speed:0.04, drop:[40,60], isHit:false };
     const r = Math.random();
-
-    if(kills>=100 && r<0.03) z={ type:"heavy", hp:4, speed:0.02, drop:[150,200] };
-    else if(kills>=50 && r<0.08) z={ type:"armored", hp:2, speed:0.04, drop:[80,110] };
-    else if(kills>=20 && r<0.12) z={ type:"fast", hp:1, speed:0.08, drop:[50,70] };
-
-    z.col = Math.floor(Math.random()*COLS);
+    if(kills >= 100 && r < 0.03) z = { type:"heavy", hp:4, speed:0.02, drop:[150,200] };
+    else if(kills >= 50 && r < 0.08) z = { type:"armored", hp:2, speed:0.04, drop:[80,110] };
+    else if(kills >= 20 && r < 0.12) z = { type:"fast", hp:1, speed:0.08, drop:[50,70] };
+    z.col = Math.floor(Math.random() * COLS);
     z.y = -1;
     zombies.push(z);
   }
-
-  spawnTimeout = setTimeout(spawnZombie, spawnDelay);
+  nextSpawnTime = Date.now() + spawnDelay;
 }
 
 function spawnMiniBoss() {
-  // KILL ALL CURRENT ZOMBIES ON LAWN
-  zombies = []; 
-  
-  // Optional: Add a small visual flair or message here
-  console.log("BOSS WAVE: Lawns Cleared!");
-
+  zombies = [];
   zombies.push({
     type: "miniboss",
-    hp: (wave * 1), // Increased HP for boss feel
-    maxHp: (wave * 1),
+    hp: wave * 6 / 5,
+    maxHp: wave * 6 / 5,
     speed: 0.015,
     y: -1,
     cols: [1, 2, 3],
@@ -602,37 +1313,46 @@ function spawnMiniBoss() {
     shootPattern: getBossShootPattern(),
     isHit: false
   });
-
   document.getElementById("bossBarContainer").style.display = "block";
   document.getElementById("bossBarFill").style.width = "100%";
-   }   burstLeft = burst;
+  playTone(200, 0.5, 0.3);
+}
+
+/* ================= UPDATE ================= */
+function update() {
+  if(paused) return;
+
+  if(coolingDown) {
+    const elapsed = (Date.now() - cooldownStart) + cooldownElapsedBeforePause;
+    const per = shootCooldown / burst;
+    burstLeft = Math.floor(elapsed / per);
+    if(burstLeft >= burst) {
+      burstLeft = burst;
       coolingDown = false;
     }
     drawCooldown();
   }
-  
 
-/* ================= UPDATE LOOP ================= */
-function update(){
-  if(coolingDown){
-    const elapsed = Date.now() - cooldownStart;
-    const per = shootCooldown / burst;
-    burstLeft = Math.floor(elapsed / per);
-    if(burstLeft >= burst){
-   
+  if(comboTimer > 0) {
+    comboTimer -= LOOP;
+    if(comboTimer <= 0) combo = 0;
+  }
+
   waveTimer += LOOP;
-  if(waveTimer >= WAVE_DURATION){
+  if(waveTimer >= WAVE_DURATION) {
     wave++;
     waveTimer = 0;
-    spawnDelay = Math.max(800, spawnDelay-400);
+    spawnDelay = Math.max(1200, spawnDelay - 150);
     if(wave % 5 === 0) spawnMiniBoss();
   }
 
-  zombies.forEach(z=>{
+  if(spawningEnabled && Date.now() >= nextSpawnTime && running) spawnZombie();
+
+  zombies.forEach(z => {
     z.y += z.speed;
-    if (z.type === "miniboss") {
+    if(z.type === "miniboss") {
       z.shootTimer += LOOP;
-      if (z.shootTimer > 2500) {
+      if(z.shootTimer > 2500) {
         z.shootTimer = 0;
         z.shootPattern.forEach(col => {
           enemyBullets.push({ col, y: z.y + 1 });
@@ -640,48 +1360,61 @@ function update(){
         z.shootPattern = getBossShootPattern();
       }
     }
-    if(z.y >= ROWS-2) endGame();
+    if(z.y >= ROWS-2) {
+      health -= (z.type === "miniboss" ? 30 : 10);
+      document.getElementById("healthFill").style.width = Math.max(0, health) + "%";
+      screenShake();
+      if(health <= 0) endGame();
+    }
   });
 
-  bullets.forEach(b=>{
+  bullets.forEach(b => {
     b.prevY = b.y;
     b.y -= bulletSpeed;
   });
 
-  enemyBullets.forEach(b=>{
+  enemyBullets.forEach(b => {
     b.y += 0.15;
-    if(Math.abs(b.y-(ROWS-1))<0.2 && b.col===turretCol){
-      endGame();
+    if(Math.abs(b.y - (ROWS-1)) < 0.2 && b.col === turretCol) {
+      health -= 15;
+      document.getElementById("healthFill").style.width = Math.max(0, health) + "%";
+      screenShake();
+      if(health <= 0) endGame();
     }
   });
 
-  /* === COLLISIONS === */
-  for(let i=bullets.length-1;i>=0;i--){
-    for(let j=zombies.length-1;j>=0;j--){
+  bullets = bullets.filter(b => b.y > -1);
+  enemyBullets = enemyBullets.filter(b => b.y < ROWS + 1);
+
+  for(let i = bullets.length-1; i >= 0; i--) {
+    for(let j = zombies.length-1; j >= 0; j--) {
       const b = bullets[i];
       const z = zombies[j];
-      const hitCol = z.cols ? z.cols.includes(b.col) : b.col===z.col;
+      const hitCol = z.cols ? z.cols.includes(b.col) : b.col === z.col;
 
-      if(hitCol && b.y<=z.y+0.6 && b.prevY>=z.y){
-        // PLAY HIT SOUND
-        hitSfx.currentTime = 0;
-        hitSfx.play();
-
+      if(hitCol && b.y <= z.y + 0.6 && b.prevY >= z.y) {
+        playHit();
         z.hp--;
         z.isHit = true;
-        z.y = Math.max(-1, z.y-knockback);
-        bullets.splice(i,1);
+        z.y = Math.max(-1, z.y - knockback);
+        bullets.splice(i, 1);
+        createExplosion(b.col, z.y);
+        showDamageText(b.col, z.y, 1);
 
-        if(z.type==="miniboss"){
-          document.getElementById("bossBarFill").style.width = (z.hp/z.maxHp*100)+"%";
+        if(z.type === "miniboss") {
+          document.getElementById("bossBarFill").style.width = (z.hp / z.maxHp * 100) + "%";
         }
 
-        if(z.hp<=0){
-          coins += Math.floor((Math.random()*(z.drop[1]-z.drop[0])+z.drop[0]) * coinMult);
-          if(z.type==="miniboss"){
-            document.getElementById("bossBarContainer").style.display="none";
+        if(z.hp <= 0) {
+          combo++;
+          updateCombo();
+          coins += Math.floor((Math.random() * (z.drop[1] - z.drop[0]) + z.drop[0]) * coinMult * (1 + combo * 0.1));
+          if(z.type === "miniboss") {
+            document.getElementById("bossBarContainer").style.display = "none";
+            screenShake();
+            playTone(1046, 0.3, 0.4);
           }
-          zombies.splice(j,1);
+          zombies.splice(j, 1);
           kills++;
         }
         break;
@@ -691,35 +1424,36 @@ function update(){
 }
 
 /* ================= RENDER ================= */
-function draw(){
+function draw() {
   const container = document.getElementById("entities");
   container.innerHTML = "";
 
-  bullets.forEach(b=>renderAt(b.col,b.y,'<div class="bullet"></div>'));
-  enemyBullets.forEach(b=>renderAt(b.col,b.y,'<div class="bullet enemyBullet"></div>'));
-
-  zombies.forEach(z=>{
-    const hit = z.isHit?" hit":"";
-    if(z.type==="miniboss"){
-      z.cols.forEach(c=>{
-        renderAt(c,z.y,
-          `<div class="zombiebody${hit}" style="background:#500;border-color:gold">
-             <div class="zombie heavy"></div>
+  zombies.forEach(z => {
+    const hit = z.isHit ? " hit" : "";
+    const pausedClass = paused ? " paused" : "";
+    if(z.type === "miniboss") {
+      z.cols.forEach(c => {
+        renderAt(c, z.y,
+          `<div class="zombiebody${hit}${pausedClass}" style="background:linear-gradient(135deg,#500,#800);border-color:gold;">
+             <div class="zombie heavy${pausedClass}"></div>
            </div>`
         );
       });
-    }else{
-      renderAt(z.col,z.y,
-        `<div class="zombiebody${hit}">
-           <div class="zombie ${z.type}"></div>
+    } else {
+      renderAt(z.col, z.y,
+        `<div class="zombiebody${hit}${pausedClass}">
+           <div class="zombie ${z.type}${pausedClass}"></div>
          </div>`
       );
     }
     z.isHit = false;
   });
 
-  renderAt(turretCol,ROWS-1,
-    `<div class="turret ${burstLeft>0?'fire':''}">
+  bullets.forEach(b => renderAt(b.col, b.y, '<div class="bullet"></div>'));
+  enemyBullets.forEach(b => renderAt(b.col, b.y, '<div class="bullet enemyBullet"></div>'));
+
+  renderAt(turretCol, ROWS-1,
+    `<div class="turret ${burstLeft > 0 ? 'fire' : ''}">
        <div class="nozzle"></div>
      </div>`
   );
@@ -730,29 +1464,30 @@ function draw(){
 }
 
 /* ================= HELPERS ================= */
-function renderAt(c,y,html){
+function renderAt(c, y, html) {
   const d = document.createElement("div");
-  d.className="entity";
-  d.style.transform=`translate(${c*TILE}px,${y*TILE}px)`;
-  d.innerHTML=html;
+  d.className = "entity";
+  d.style.left = (c * 20) + "%";
+  d.style.top = (y * 10) + "%";
+  d.innerHTML = html;
   document.getElementById("entities").appendChild(d);
 }
 
-function drawCooldown(){
+function drawCooldown() {
   const bar = document.getElementById("cooldownBar");
-  bar.innerHTML="";
-  for(let i=0;i<burst;i++){
+  bar.innerHTML = "";
+  for(let i = 0; i < burst; i++) {
     const seg = document.createElement("div");
-    seg.className="cooldownSeg";
+    seg.className = "cooldownSeg";
     const fill = document.createElement("div");
-    fill.className="cooldownSegFill";
+    fill.className = "cooldownSegFill";
 
-    if(!coolingDown){
-      fill.style.width = i<burstLeft?"100%":"0%";
-    }else{
-      const per = shootCooldown/burst;
-      fill.style.width =
-        Math.min(100,(Date.now()-cooldownStart-i*per)/per*100)+"%";
+    if(!coolingDown) {
+      fill.style.width = i < burstLeft ? "100%" : "0%";
+    } else {
+      const per = shootCooldown / burst;
+      const elapsed = (Date.now() - cooldownStart) + cooldownElapsedBeforePause;
+      fill.style.width = Math.min(100, Math.max(0, (elapsed - i * per) / per * 100)) + "%";
     }
 
     seg.appendChild(fill);
@@ -761,28 +1496,39 @@ function drawCooldown(){
 }
 
 /* ================= END / SHOP ================= */
-function endGame(){
-  running=false;
-  over=true;
-  spawningEnabled=false;
-  clearTimeout(spawnTimeout);
-  document.getElementById("gameOver").style.display="flex";
-  document.getElementById("finalScore").textContent = `Kills: ${kills} | Wave: ${wave}`;
+function endGame() {
+  running = false;
+  over = true;
+  spawningEnabled = false;
+  paused = false;
+  document.getElementById("gameOver").style.display = "flex";
+  document.getElementById("finalScore").innerHTML = `
+    <strong>📊 Final Stats</strong><br><br>
+    👾 Kills: <strong>${kills}</strong><br>
+    🌊 Wave Reached: <strong>${wave}</strong><br>
+    ⚡ Max Combo: <strong>${combo}x</strong><br>
+    💰 Coins Earned: <strong>${coins}</strong>
+  `;
 }
 
-function openUpgrades(){
-  running=false;
-  spawningEnabled=false;
-  clearTimeout(spawnTimeout);
+function openUpgrades() {
+  paused = true;
+  spawningEnabled = false;
+  if(coolingDown) {
+    cooldownElapsedBeforePause += Date.now() - cooldownStart;
+  }
   refreshUpgrades();
-  document.getElementById("upgradeOverlay").style.display="flex";
+  document.getElementById("upgradeOverlay").style.display = "flex";
 }
 
-function closeUpgrades(){
-  document.getElementById("upgradeOverlay").style.display="none";
-  running=true;
-  spawningEnabled=true;
-  spawnZombie();
+function closeUpgrades() {
+  paused = false;
+  spawningEnabled = true;
+  if(coolingDown) {
+    cooldownStart = Date.now();
+  }
+  nextSpawnTime = Date.now() + spawnDelay;
+  document.getElementById("upgradeOverlay").style.display = "none";
 }
 
 /* ================= UPGRADES UI ================= */
@@ -794,13 +1540,11 @@ function refreshUpgrades() {
     const cost = u.costs[u.lvl];
     const isMax = u.lvl >= u.vals.length;
     
-    // Create Row Container
     const row = document.createElement("div");
     row.className = "upgradeRow";
 
-    // Create Level Pips
     let pipsHtml = "";
-    for(let i=0; i < u.vals.length; i++) {
+    for(let i = 0; i < u.vals.length; i++) {
       pipsHtml += `<div class="pip ${i < u.lvl ? 'filled' : ''}"></div>`;
     }
 
@@ -811,15 +1555,13 @@ function refreshUpgrades() {
       </div>
     `;
 
-    // Create Button
     const btn = document.createElement("button");
     btn.className = "buy-btn";
-    btn.innerHTML = isMax ? "MAXED" : `🪙 ${cost}`;
+    btn.innerHTML = isMax ? "✓ MAXED" : `🪙 ${cost}`;
     btn.disabled = isMax || coins < cost;
     
     btn.onclick = () => {
-      upgradeSfx.currentTime = 0;
-      upgradeSfx.play();
+      playUpgrade();
       coins -= cost;
       u.apply(u.vals[u.lvl]);
       u.lvl++;
@@ -831,15 +1573,45 @@ function refreshUpgrades() {
     list.appendChild(row);
   });
 }
+
+/* ================= KEYBOARD ================= */
+document.addEventListener('keydown', (e) => {
+  if(!running || paused) return;
+  switch(e.key.toLowerCase()) {
+    case 'arrowleft':
+    case 'a':
+      move(-1);
+      break;
+    case 'arrowright':
+    case 'd':
+      move(1);
+      break;
+    case ' ':
+    case 'enter':
+      e.preventDefault();
+      shoot();
+      break;
+    case 'r':
+      reload();
+      break;
+  }
+});
+
 /* ================= MAIN LOOP ================= */
-setInterval(()=>{
-  if(running && !over){
+let gameLoopId = setInterval(() => {
+  if(running && !over) {
     update();
     draw();
   }
 }, LOOP);
+
+/* ================= CLEANUP ================= */
+window.addEventListener('beforeunload', () => {
+  clearInterval(gameLoopId);
+});
+
+initGame();
 </script>
 
 </body>
 </html>
-
